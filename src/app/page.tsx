@@ -1,9 +1,16 @@
-import React from 'react'
+"use client";
+
+import React, { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 const Home = () => {
-  return (
-    <div>Home</div>
-  )
-}
+  const router = useRouter();
 
-export default Home
+  useEffect(() => {
+    router.push('/login');
+  }, [router]);
+
+  return null;
+};
+
+export default Home;
