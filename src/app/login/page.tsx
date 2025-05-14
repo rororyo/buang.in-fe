@@ -17,19 +17,17 @@ const Login = () => {
         email,
         password,
       });
-      if (response.status === 200) {
+      if (response.status === 201) {
         const token = response.data.token;
-        document.cookie = `token=${token}; path=/; max-age=${7 * 24 * 60 * 60}; secure`;
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        localStorage.setItem('token', token);
         toast.success('Login successful!');
         setTimeout(() => {
-          router.push('/');
+          router.push('/dashboard');
         }, 500); 
       }
       if (response.status ==400){
         toast.error('Invalid credentials!');
       }
-
     } catch (error: any) {
       toast.error(error?.response?.data?.message || 'Login failed');
     }
