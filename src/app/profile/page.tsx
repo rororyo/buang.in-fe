@@ -1,10 +1,18 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowLeftIcon, UserIcon, BellIcon, LockIcon, ShieldIcon, ChevronRightIcon, ChevronLeftIcon } from 'lucide-react';
 import Footer from '@/components/footer';
+import { useUser } from '@/lib/context/UserContext';
+import { stringify } from 'querystring';
 
 const ProfilPage = () => {
+  const { user, loading } = useUser();
+  useEffect(() => {
+  if (!loading && user) {
+    alert(user.username); 
+  }
+}, [loading, user]);
   const [isNotificationEnabled, setIsNotificationEnabled] = useState(false);
 
   const handleBackClick = () => {
