@@ -3,6 +3,7 @@
 import React from 'react';
 import { FaFileAlt, FaWineGlassAlt, FaTrashAlt } from 'react-icons/fa';
 import { FaBottleWater } from "react-icons/fa6";
+import Footer from '@/components/footer';
 
 const DashboardPage = () => {
   const username = "Lorem Ipsum";
@@ -79,6 +80,8 @@ const DashboardPage = () => {
           </div>
         </div>
       </div>
+      {/* Footer */}
+      <Footer/>
     </div>
   );
 };
