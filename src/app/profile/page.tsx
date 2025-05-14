@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { ArrowLeftIcon, UserIcon, BellIcon, LockIcon, ShieldIcon, ChevronRightIcon, ChevronLeftIcon } from 'lucide-react';
+import Footer from '@/components/footer';
 
 const ProfilPage = () => {
   const [isNotificationEnabled, setIsNotificationEnabled] = useState(false);
@@ -107,6 +108,8 @@ const ProfilPage = () => {
           </div>
         </div>
       </div>
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };

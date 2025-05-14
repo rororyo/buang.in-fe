@@ -1,8 +1,15 @@
+"use client"
+
 import React from 'react'
+import { useState } from 'react'
+import Footer from '@/components/footer'
 
 const PenukaranPage = () => {
   return (
-    <div>PenukaranPage</div>
+    <div>
+      Penukaran
+      <Footer />
+    </div>
   )
 }
 
