@@ -1,20 +1,39 @@
 "use client";
-
+import api from '@/lib/api';
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 const Register = () => {
+  const router = useRouter();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      alert('Passwords do not match!');
+      toast.error('Passwords do not match!');
       return;
     }
-    console.log('Register:', { username, email, password });
+  
+    try {
+      const response = await api.post('auth/register', {
+        username,
+        email,
+        password,
+      });
+      toast.success('Registration successful!');
+      setTimeout(() => {
+        router.push('/login');
+      }, 500);
+      
+    } catch (error: any) {
+      alert(error?.response?.data?.message || 'Registration failed');
+    }
   };
 
   return (

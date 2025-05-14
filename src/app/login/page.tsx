@@ -1,15 +1,39 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import api from '@/lib/api';
+import { toast } from 'react-toastify';
 
 const Login = () => {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login:', { email, password });
-  };
+    try{
+      const response = await api.post('auth/login', {
+        email,
+        password,
+      });
+      if (response.status === 200) {
+        const token = response.data.token;
+        document.cookie = `token=${token}; path=/; max-age=${7 * 24 * 60 * 60}; secure`;
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        toast.success('Login successful!');
+        setTimeout(() => {
+          router.push('/');
+        }, 500); 
+      }
+      if (response.status ==400){
+        toast.error('Invalid credentials!');
+      }
+
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Login failed');
+    }
+    }
 
   return (
     <div className="flex items-center justify-center min-h-screen" style={{ backgroundColor: '#235C58' }}>
