@@ -4,10 +4,13 @@ import React from 'react';
 import { FaFileAlt, FaWineGlassAlt, FaTrashAlt } from 'react-icons/fa';
 import { FaBottleWater } from "react-icons/fa6";
 import Footer from '@/components/footer';
+import { useUser } from '@/lib/context/UserContext';
 
 const DashboardPage = () => {
-  const username = "Lorem Ipsum";
-  const saldo = 1500000; // Ganti dengan data saldo yang sesuai
+  const { user, loading } = useUser();
+
+  const username = user?.username || 'User';
+  const saldo = user?.points || 0; 
 
   return (
     <div className="flex flex-col items-center min-h-screen p-6" style={{ backgroundColor: '#235C58' }}>
