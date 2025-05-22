@@ -23,7 +23,7 @@ const Login = () => {
         toast.success('Login successful!');
         setTimeout(() => {
           router.push('/dashboard');
-        }, 500); 
+        }, 200); 
       }
       if (response.status ==400){
         toast.error('Invalid credentials!');

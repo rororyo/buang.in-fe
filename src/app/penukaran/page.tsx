@@ -8,21 +8,31 @@ import DropdownJenisSampah from "@/components/penukaran-page/drop-down-jenis-sam
 import LokasiSetorSampah from "@/components/penukaran-page/lokasi-setor-sampah";
 import TombolSetor from "@/components/penukaran-page/tombol-setor";
 import TombolFoto from "@/components/penukaran-page/tombol-foto";
+import { useUser } from "@/lib/context/UserContext";
+import useGeolocation from "@/lib/hooks/useGeolocation";
+import { useRouter } from "next/navigation";
 
 const PenukaranPage = () => {
-  const [selectedTrash, setSelectedTrash] = useState<string | null>(null);
+  const router = useRouter();
+  const { user, loading } = useUser();
+  const { lat, lon, error } = useGeolocation();
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
       {/* Tombol Back dan Judul */}
-      <div className="fixed w-full items-center justify-between p-4 bg-white shadow-md" style={{ backgroundColor: "#569490" }}>
+      <div
+        className="fixed w-full items-center justify-between p-4 bg-white shadow-md"
+        style={{ backgroundColor: "#569490" }}
+      >
         <button
-          onClick={() => (window.location.href = "/dashboard")}
+          onClick={() => (router.push ("/dashboard"))}
           className="absolute top-3 left-4 flex items-center justify-center w-10 h-10 text-white bg-black rounded-full hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <ChevronLeftIcon size={20} />
         </button>
-        <h1 className="text-2xl font-bold text-gray-800 text-center w-full">Setor Sampah</h1>
+        <h1 className="text-2xl font-bold text-gray-800 text-center w-full">
+          Setor Sampah
+        </h1>
       </div>
 
       {/* Form Input */}
@@ -33,7 +43,7 @@ const PenukaranPage = () => {
       </div>
 
       {/* Lokasi Setor Sampah */}
-      <LokasiSetorSampah />
+      <LokasiSetorSampah lat={lat} lon={lon} />
 
       {/* Tombol Setor */}
       <TombolSetor />

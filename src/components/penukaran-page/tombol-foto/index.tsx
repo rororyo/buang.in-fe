@@ -16,7 +16,7 @@ const TombolFoto = () => {
         style={{ backgroundColor: "#569490" }}
       >
         <FaCamera size={25} className="mr-2" />
-        Input Foto
+        Input Foto Sampah
       </button>
     </div>
   );
