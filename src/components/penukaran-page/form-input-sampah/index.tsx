@@ -3,21 +3,42 @@ import TombolFoto from "@/components/penukaran-page/tombol-foto";
 import DropdownJenisSampah from "@/components/penukaran-page/drop-down-jenis-sampah";
 import { X } from "lucide-react";
 import NearbyTrashBanksDrawer from "../nearby-trash-bank-drawer";
+import { useUser } from "@/lib/context/UserContext";
 
 interface FormInputProps {
-  lat?: number | null;
-  lon?: number | null;
+  lat: number | null;
+  lon: number | null;
+  formData: {
+    nama: string;
+    alamat: string;
+    phone: string;
+    pickupTime: string;
+    selectedTrashes: any[];
+    berat: number;
+    selectedImage: any;
+    selectedImagePreview: string;
+    selectedTrashBank: any;
+  };
+  setFormData: React.Dispatch<React.SetStateAction<{
+    nama: string;
+    alamat: string;
+    phone: string;
+    pickupTime: string;
+    selectedTrashes: any[];
+    berat: number;
+    selectedImage: any;
+    selectedImagePreview: string;
+    selectedTrashBank: any;
+  }>>;
 }
 
-const FormInput: React.FC<FormInputProps> = ({ lat, lon }) => {
-  const [selectedTrash, setSelectedTrash] = React.useState<string | null>(null);
+const FormInput: React.FC<FormInputProps> = ({
+  lat,
+  lon,
+  formData,
+  setFormData,
+}) => {
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
-  const [selectedTrashBank, setSelectedTrashBank] = React.useState<{
-    id: string;
-    username: string;
-    address: string | null;
-    distance: number;
-  } | null>(null);
 
   return (
     <>
@@ -29,6 +50,8 @@ const FormInput: React.FC<FormInputProps> = ({ lat, lon }) => {
         <input
           type="text"
           id="nama"
+          value={formData.nama}
+          onChange={(e) => setFormData({ ...formData, nama: e.target.value })}
           className="w-full p-2 mt-1 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
           placeholder="Masukkan nama Anda"
           style={{ backgroundColor: "#569490" }}
@@ -37,20 +60,52 @@ const FormInput: React.FC<FormInputProps> = ({ lat, lon }) => {
 
       {/* Alamat */}
       <div className="mb-4">
-        <label htmlFor="alamat" className="block text-sm font-medium text-black">
+        <label
+          htmlFor="alamat"
+          className="block text-sm font-medium text-black"
+        >
           Alamat
         </label>
         <input
           type="text"
           id="alamat"
+          value={formData.alamat}
+          onChange={(e) => setFormData({ ...formData, alamat: e.target.value })}
           className="w-full p-2 mt-1 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
           placeholder="Masukkan alamat Anda"
           style={{ backgroundColor: "#569490" }}
         />
       </div>
+      {/* Phone Number */}
+      <input
+        type="text"
+        id="phone"
+        value={formData.phone}
+        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+        className="w-full p-2 mt-1 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+        placeholder="Nomor Telepon"
+        style={{ backgroundColor: "#569490" }}
+      />
+      {/* Pickup Time */}
+      <input
+        type="datetime-local"
+        id="pickupTime"
+        placeholder="Waktu Pengambilan"
+        value={formData.pickupTime}
+        onChange={(e) =>
+          setFormData({ ...formData, pickupTime: e.target.value })
+        }
+        style={{ backgroundColor: "#569490" }}
+        className="w-full p-2 mt-1 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+      />
 
       {/* Jenis Sampah */}
-      <DropdownJenisSampah selectedTrash={selectedTrash} setSelectedTrash={setSelectedTrash} />
+      <DropdownJenisSampah
+        selectedTrashes={formData.selectedTrashes}
+        setSelectedTrashes={(value) =>
+          setFormData({ ...formData, selectedTrashes: value })
+        }
+      />
 
       {/* Berat */}
       <div className="mb-4">
@@ -67,10 +122,32 @@ const FormInput: React.FC<FormInputProps> = ({ lat, lon }) => {
       </div>
 
       {/* Tombol Foto */}
-      <TombolFoto />
+<TombolFoto
+  onImageSelected={(file, previewUrl) => {
+    setFormData((prev) => ({
+      ...prev,
+      selectedImage: file, // ✅ Send File object
+      selectedImagePreview: previewUrl,
+    }));
+  }}
+/>
+
+      {/* Selected Image Display */}
+      {formData.selectedImagePreview && (
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-black mb-2">
+            Foto Sampah
+          </label>
+          <img
+            src={formData.selectedImagePreview}
+            alt="Foto Sampah"
+            className="w-full h-auto rounded-md border border-gray-300"
+          />
+        </div>
+      )}
 
       {/* Selected Trash Bank Display */}
-      {selectedTrashBank && (
+      {formData.selectedTrashBank && (
         <div className="mb-4">
           <label className="block text-sm font-medium text-black mb-2">
             Bank Sampah Terpilih
@@ -78,16 +155,18 @@ const FormInput: React.FC<FormInputProps> = ({ lat, lon }) => {
           <div className="p-3 bg-green-50 border border-green-200 rounded-md">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium text-green-800">{selectedTrashBank.username}</p>
-                <p className="text-sm text-green-600">
-                  {selectedTrashBank.address || "Alamat tidak tersedia"}
+                <p className="font-medium text-green-800">
+                  {formData.selectedTrashBank.username}
                 </p>
                 <p className="text-sm text-green-600">
-                  {(selectedTrashBank.distance / 1000).toFixed(1)} km
+                  {formData.selectedTrashBank.address || "Alamat tidak tersedia"}
+                </p>
+                <p className="text-sm text-green-600">
+                  {(formData.selectedTrashBank.distance / 1000).toFixed(1)} km
                 </p>
               </div>
               <button
-                onClick={() => setSelectedTrashBank(null)}
+                onClick={() => setFormData({ ...formData, selectedTrashBank: null })}
                 className="text-green-600 hover:text-green-800 p-1"
               >
                 <X size={16} />
@@ -104,7 +183,11 @@ const FormInput: React.FC<FormInputProps> = ({ lat, lon }) => {
           className="w-full p-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
           disabled={!lat || !lon}
         >
-          {!lat || !lon ? "Memuat lokasi..." : selectedTrashBank ? "Ganti Bank Sampah" : "Pilih Bank Sampah Terdekat"}
+          {!lat || !lon
+            ? "Memuat lokasi..."
+            : formData.selectedTrashBank
+            ? "Ganti Bank Sampah"
+            : "Pilih Bank Sampah Terdekat"}
         </button>
       </div>
 
@@ -115,10 +198,10 @@ const FormInput: React.FC<FormInputProps> = ({ lat, lon }) => {
         lat={lat}
         lon={lon}
         onSelectTrashBank={(trashBank) => {
-          setSelectedTrashBank(trashBank);
+          setFormData({ ...formData, selectedTrashBank: trashBank });
           setIsDrawerOpen(false);
         }}
-        selectedTrashBankId={selectedTrashBank?.id}
+        selectedTrashBankId={formData.selectedTrashBank?.id}
       />
     </>
   );

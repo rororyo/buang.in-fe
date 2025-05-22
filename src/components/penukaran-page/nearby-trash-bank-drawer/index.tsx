@@ -9,23 +9,6 @@ interface TrashBank {
   distance: number;
 }
 
-interface ApiResponse {
-  status: string;
-  message: string;
-  data: Array<{
-    id: string;
-    username: string;
-    address: string | null;
-    distance: number;
-  }>;
-  paging: {
-    page: number;
-    size: number;
-    total_item: number;
-    total_page: number;
-  };
-}
-
 interface NearbyTrashBanksDrawerProps {
   isOpen: boolean;
   onClose: () => void;

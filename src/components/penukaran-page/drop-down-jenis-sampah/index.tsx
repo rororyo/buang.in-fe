@@ -8,13 +8,13 @@ interface TrashType {
 }
 
 interface DropdownJenisSampahProps {
-  selectedTrash: string | null;
-  setSelectedTrash: (value: string | null) => void;
+  selectedTrashes: string[];
+  setSelectedTrashes: (values: string[]) => void;
 }
 
 const DropdownJenisSampah: React.FC<DropdownJenisSampahProps> = ({
-  selectedTrash,
-  setSelectedTrash,
+  selectedTrashes,
+  setSelectedTrashes,
 }) => {
   const [dropdownOptions, setDropdownOptions] = useState<TrashType[]>([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -44,12 +44,22 @@ const DropdownJenisSampah: React.FC<DropdownJenisSampahProps> = ({
     };
   }, []);
 
-  const selectedName =
-    dropdownOptions.find((item) => item.id === selectedTrash)?.name || "Pilih jenis sampah";
+  const handleCheckboxChange = (id: string) => {
+    if (selectedTrashes.includes(id)) {
+      setSelectedTrashes(selectedTrashes.filter((trashId) => trashId !== id));
+    } else {
+      setSelectedTrashes([...selectedTrashes, id]);
+    }
+  };
+
+  const selectedNames = dropdownOptions
+    .filter((item) => selectedTrashes.includes(item.id))
+    .map((item) => item.name)
+    .join(", ") || "Pilih jenis sampah";
 
   return (
     <div className="mb-4 relative" ref={dropdownRef}>
-      <label htmlFor="jenis-sampah" className="block text-sm font-medium text-black">
+      <label className="block text-sm font-medium text-black">
         Jenis Sampah
       </label>
       <div
@@ -57,21 +67,23 @@ const DropdownJenisSampah: React.FC<DropdownJenisSampahProps> = ({
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
         style={{ backgroundColor: "#569490", color: "white", cursor: "pointer" }}
       >
-        {selectedName}
+        {selectedNames}
       </div>
       {isDropdownOpen && (
-        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg">
+        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
           {dropdownOptions.map((item) => (
-            <div
+            <label
               key={item.id}
-              className="p-2 hover:bg-gray-100 cursor-pointer"
-              onClick={() => {
-                setSelectedTrash(item.id);
-                setIsDropdownOpen(false);
-              }}
+              className="flex items-center p-2 hover:bg-gray-100 cursor-pointer"
             >
+              <input
+                type="checkbox"
+                checked={selectedTrashes.includes(item.id)}
+                onChange={() => handleCheckboxChange(item.id)}
+                className="mr-2"
+              />
               {item.name}
-            </div>
+            </label>
           ))}
         </div>
       )}

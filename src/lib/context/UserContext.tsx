@@ -35,13 +35,10 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 
   const fetchCurrentUser = async () => {
     try {
-      const token = Cookies.get("token");
-      if (!token) {
-        setUser(null);
-        return;
-      }
       const res = await api.get("/auth/current-user");
-      setUser(res.data);
+      if (res.status == 200) {
+        setUser(res.data);
+      }
     } catch (err) {
       console.error("Failed to fetch current user", err);
       setUser(null);
