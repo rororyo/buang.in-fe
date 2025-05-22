@@ -1,12 +1,28 @@
 "use client";
 
-import React from "react";
+import React, { useRef } from "react";
 import { FaCamera } from "react-icons/fa";
 
-const TombolFoto = () => {
+interface TombolFotoProps {
+  onImageSelected: (file: File, previewUrl: string) => void;
+}
+
+
+const TombolFoto: React.FC<TombolFotoProps> = ({ onImageSelected }) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const handleFotoClick = () => {
-    console.log("Tombol Foto diklik");
+    fileInputRef.current?.click(); // Trigger hidden file input
   };
+
+const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const file = event.target.files?.[0];
+  if (file) {
+    const imageUrl = URL.createObjectURL(file);
+    onImageSelected(file, imageUrl); // ✅ Send File and preview URL
+  }
+};
+
 
   return (
     <div className="mb-4">
@@ -16,8 +32,16 @@ const TombolFoto = () => {
         style={{ backgroundColor: "#569490" }}
       >
         <FaCamera size={25} className="mr-2" />
-        Input Foto
+        Input Foto Sampah
       </button>
+      <input
+        type="file"
+        accept="image/*"
+        capture="environment"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        style={{ display: "none" }}
+      />
     </div>
   );
 };

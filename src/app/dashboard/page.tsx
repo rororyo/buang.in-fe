@@ -8,7 +8,6 @@ import { useUser } from '@/lib/context/UserContext';
 
 const DashboardPage = () => {
   const { user, loading } = useUser();
-
   const username = user?.username || 'User';
   const saldo = user?.points || 0; 
 
