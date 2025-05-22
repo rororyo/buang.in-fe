@@ -38,7 +38,7 @@ const PenukaranPage = () => {
       {/* Form Input */}
       <div className="flex flex-col items-center p-6 mt-10">
         <div className="w-full p-6 rounded-lg">
-          <FormInput />
+          <FormInput lat={lat} lon={lon} />
         </div>
       </div>
 
