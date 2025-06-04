@@ -58,19 +58,19 @@ const DropdownJenisSampah: React.FC<DropdownJenisSampahProps> = ({
     .join(", ") || "Pilih jenis sampah";
 
   return (
-    <div className="mb-4 relative" ref={dropdownRef}>
+    <div ref={dropdownRef}>
       <label className="block text-sm font-medium text-black">
         Jenis Sampah
       </label>
       <div
         className="w-full p-2 mt-1 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-        style={{ backgroundColor: "#569490", color: "white", cursor: "pointer" }}
+        style={{ backgroundColor: "#569490", cursor: "pointer" }}
       >
         {selectedNames}
       </div>
       {isDropdownOpen && (
-        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+        <div className="absolute z-10 w-full mt-1 top-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
           {dropdownOptions.map((item) => (
             <label
               key={item.id}
