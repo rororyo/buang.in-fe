@@ -85,7 +85,7 @@ const PenukaranPage = () => {
     <div className="flex flex-col min-h-screen bg-white">
       {error && (
         <div className="mt-24 px-6">
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
             <strong className="font-bold">Lokasi Diperlukan!</strong>
             <span className="block sm:inline ml-2">
               {error === "User denied Geolocation" || error.includes("denied")

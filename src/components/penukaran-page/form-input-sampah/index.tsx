@@ -59,7 +59,7 @@ const FormInput: React.FC<FormInputProps> = ({
       </div>
 
       {/* Alamat */}
-      <div className="mb-4">
+      <div className="mb-2">
         <label
           htmlFor="alamat"
           className="block text-sm font-medium text-black"
@@ -77,6 +77,10 @@ const FormInput: React.FC<FormInputProps> = ({
         />
       </div>
       {/* Phone Number */}
+      <div className="mb-2">
+        <label htmlFor="phone" className="block text-sm font-medium text-black">
+          Nomor Telepon
+        </label>
       <input
         type="text"
         id="phone"
@@ -86,11 +90,18 @@ const FormInput: React.FC<FormInputProps> = ({
         placeholder="Nomor Telepon"
         style={{ backgroundColor: "#569490" }}
       />
+      </div>
+
+      
       {/* Pickup Time */}
-      <input
+      <div className="mb-4">
+      <label htmlFor="pickupTime" className="block text-sm font-medium text-black">
+        Waktu Setor
+      </label>
+        <input
         type="datetime-local"
         id="pickupTime"
-        placeholder="Waktu Pengambilan"
+        placeholder="Waktu Setor"
         value={formData.pickupTime}
         onChange={(e) =>
           setFormData({ ...formData, pickupTime: e.target.value })
@@ -98,14 +109,20 @@ const FormInput: React.FC<FormInputProps> = ({
         style={{ backgroundColor: "#569490" }}
         className="w-full p-2 mt-1 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
       />
+      </div>
+      
 
+
+      
       {/* Jenis Sampah */}
-      <DropdownJenisSampah
+      <div className="mb-4">
+        <DropdownJenisSampah
         selectedTrashes={formData.selectedTrashes}
         setSelectedTrashes={(value) =>
           setFormData({ ...formData, selectedTrashes: value })
         }
       />
+      </div>
 
       {/* Berat */}
       <div className="mb-4">
@@ -180,8 +197,9 @@ const FormInput: React.FC<FormInputProps> = ({
       <div className="mb-4">
         <button
           onClick={() => setIsDrawerOpen(true)}
-          className="w-full p-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+          className="w-full p-2 text-black rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
           disabled={!lat || !lon}
+          style={{ backgroundColor: "#569490" }}
         >
           {!lat || !lon
             ? "Memuat lokasi..."

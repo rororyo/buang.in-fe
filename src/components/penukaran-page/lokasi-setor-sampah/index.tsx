@@ -36,7 +36,7 @@ const MapComponent: React.FC<Props> = ({ lat, lon }) => {
         >
           Lokasi Penjemputan Sampah
         </h2>
-        <div className="w-full h-40 border border-gray-300 rounded-md overflow-hidden">
+        <div className="w-full h-80 border border-gray-300 rounded-md overflow-hidden">
           {isReady ? (
             <mapComponents.MapContainer
               center={[lat!, lon!]}
@@ -59,7 +59,6 @@ const MapComponent: React.FC<Props> = ({ lat, lon }) => {
   );
 };
 
-// Dynamic import with no SSR
 const DynamicMap = dynamic(() => Promise.resolve(MapComponent), {
   ssr: false,
   loading: () => (
