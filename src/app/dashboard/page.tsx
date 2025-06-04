@@ -55,7 +55,7 @@ const DashboardPage = () => {
           </div>
 
           {/* Plastik */}
-          <div className="flex flex-col items-center bg-gray-100 p-4 rounded-lg shadow" style={{ backgroundColor: "#569490" }}>
+          <div className="flex flex-col items-center bg-gray-100 p-4 rounded-lg shadow" >
             <FaBottleWater size={32} className="text-green-500 mb-2" />
             <h4 className="text-md font-semibold text-gray-800">Plastik</h4>
             <p className="text-sm text-black-600 text-center">
