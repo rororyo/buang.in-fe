@@ -6,7 +6,8 @@ const Footer = () => {
   const router = useRouter();
   const pathname = usePathname();
 
-  const isActivePage = (path: string) => pathname === path;
+  //const isActivePage = (path: string) => pathname === path;
+  const isActivePage = (path: string) => pathname.includes(path);
 
   const navigate = (path: string) => {
     router.push(path);

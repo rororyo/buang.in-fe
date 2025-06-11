@@ -79,7 +79,7 @@ export default function TransactionHistory() {
 
             <div className="flex flex-col items-end">
               <button
-                onClick={() => {}}
+                onClick={() => (window.location.href = "/riwayat/" + riwayat.id)}
                 className="text-xs text-cyan-700 border border-cyan-700 px-3 py-1 rounded-full hover:bg-cyan-50 transition"
               >
                 Detail
