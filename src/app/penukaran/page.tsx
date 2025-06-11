@@ -97,12 +97,12 @@ const PenukaranPage = () => {
       )}
 
       {/* Tombol Back dan Judul */}
-      <div className="fixed z-50 w-full items-center justify-between p-4 bg-white shadow-md" style={{ backgroundColor: "#235C58" }}>
+      <div className="fixed z-50 w-full items-center justify-between p-4 bg-white shadow-md" style={{ backgroundColor: "#FFFFFF" }}>
         <button
           onClick={() => (window.location.href = "/dashboard")}
-          className="absolute top-3 left-4 flex items-center justify-center w-10 h-10 text-white bg-black rounded-full hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="absolute top-3 left-4 flex items-center justify-center w-10 h-10 text-white rounded-full hover:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <ChevronLeftIcon size={20} />
+          <ChevronLeftIcon size={20} stroke="black"/>
         </button>
         <h1 className="text-2xl font-bold text-black-500 text-center w-full">Penukaran</h1>
       </div>
