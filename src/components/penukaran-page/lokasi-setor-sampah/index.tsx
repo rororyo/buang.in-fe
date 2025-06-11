@@ -28,7 +28,7 @@ const MapComponent: React.FC<Props> = ({ lat, lon }) => {
   const isReady = lat !== null && lon !== null && isLoaded && mapComponents;
 
   return (
-    <div className="flex flex-col items-center p-6">
+    <div className="flex flex-col items-center p-6" style={ { backgroundColor: "#569490" }}>
       <div className="w-full bg-white p-6 rounded-lg">
         <h2
           className="text-lg font-bold mb-4 text-center"
@@ -36,14 +36,19 @@ const MapComponent: React.FC<Props> = ({ lat, lon }) => {
         >
           Lokasi Penjemputan Sampah
         </h2>
-        <div className="w-full h-80 border border-gray-300 rounded-md overflow-hidden">
+        <div className="w-full h-80 border border-gray-300 rounded-md" 
+          style={ { 
+            position: "relative",
+            overflow: "hidden",
+            maxHeight: "400px",
+            zIndex: 0,}}>
           {isReady ? (
             <mapComponents.MapContainer
               center={[lat!, lon!]}
               zoom={15}
               style={{ height: "100%", width: "100%" }}
             >
-              <mapComponents.TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+              <mapComponents.TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"/>
               <mapComponents.Marker position={[lat!, lon!]}>
                 <mapComponents.Popup>You are here</mapComponents.Popup>
               </mapComponents.Marker>
@@ -70,7 +75,7 @@ const DynamicMap = dynamic(() => Promise.resolve(MapComponent), {
         >
           Lokasi Penjemputan Sampah
         </h2>
-        <div className="w-full h-40 border border-gray-300 rounded-md overflow-hidden">
+        <div className="flex w-full h-40 border border-gray-300 rounded-md overflow-hidden">
           <div className="flex items-center justify-center h-full text-gray-500">
             Loading map...
           </div>

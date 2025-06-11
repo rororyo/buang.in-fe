@@ -43,7 +43,7 @@ const FormInput: React.FC<FormInputProps> = ({
   return (
     <>
       {/* Nama */}
-      <div className="mb-4">
+      <div className="mb-4 pt-20">
         <label htmlFor="nama" className="block text-sm font-medium text-black">
           Nama
         </label>
