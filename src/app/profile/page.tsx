@@ -18,6 +18,12 @@ type ProfileType = {
 
 const ProfilPage = () => {
   const { user, loading } = useUser();
+  const username = user?.username || 'User';
+  const email = user?.email || 'Email';
+  const createdAt = user?.created_at || '1970-01-01';
+  const dateOnly = createdAt.split('T')[0]; // "2025-06-11"
+  const role = user?.role || 'user';
+  const alamat = user?.address || 'Belum ada alamat';
 
   const [isNotificationEnabled, setIsNotificationEnabled] = useState(false);
 
@@ -28,14 +34,24 @@ const ProfilPage = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Dummy data jika user belum ada
+// const defaultProfile: ProfileType = {
+//   username: "adity123",
+//   email: "adity@example.com",
+//   createdAt: "2024-06-01",
+//   jumlahPenukaran: 5,
+//   photoUrl: "https://via.placeholder.com/150",
+//   role: "user",
+//   alamat: "Jl. Contoh Alamat No. 123, Jakarta"
+// };
+
 const defaultProfile: ProfileType = {
-  username: "adity123",
-  email: "adity@example.com",
-  createdAt: "2024-06-01",
+  username: username,
+  email: email,
+  createdAt: dateOnly,
   jumlahPenukaran: 5,
   photoUrl: "https://via.placeholder.com/150",
-  role: "user",
-  alamat: "Jl. Contoh Alamat No. 123, Jakarta"
+  role: role,
+  alamat: alamat
 };
 
   const profile: ProfileType = user && 'createdAt' in user && 'jumlahPenukaran' in user && 'photoUrl' in user && 'role' in user && 'alamat' in user
