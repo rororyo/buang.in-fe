@@ -65,7 +65,7 @@ const DropdownJenisSampah: React.FC<DropdownJenisSampahProps> = ({
       <div
         className="w-full p-2 mt-1 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-        style={{ backgroundColor: "#569490", cursor: "pointer" }}
+        style={{ backgroundColor: "#ffffff", cursor: "pointer" }}
       >
         {selectedNames}
       </div>

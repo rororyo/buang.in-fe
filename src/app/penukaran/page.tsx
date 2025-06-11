@@ -82,7 +82,7 @@ const PenukaranPage = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen" style={{ backgroundColor: "#569490" }}>
       {error && (
         <div className="mt-24 px-6">
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
@@ -99,7 +99,7 @@ const PenukaranPage = () => {
       {/* Tombol Back dan Judul */}
       <div
         className="fixed w-full items-center justify-between p-4 bg-white shadow-md"
-        style={{ backgroundColor: "#569490" }}
+        style={{ backgroundColor: "#235C58" }}
       >
         <h1 className="text-2xl font-bold text-gray-800 text-center w-full">
           Setor Sampah
