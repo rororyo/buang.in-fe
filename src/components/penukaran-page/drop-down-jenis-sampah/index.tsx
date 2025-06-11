@@ -58,7 +58,7 @@ const DropdownJenisSampah: React.FC<DropdownJenisSampahProps> = ({
     .join(", ") || "Pilih jenis sampah";
 
   return (
-    <div ref={dropdownRef}>
+    <div ref={dropdownRef} className="relative w-full mb-4">
       <label className="block text-sm font-medium text-black">
         Jenis Sampah
       </label>
@@ -70,7 +70,7 @@ const DropdownJenisSampah: React.FC<DropdownJenisSampahProps> = ({
         {selectedNames}
       </div>
       {isDropdownOpen && (
-        <div className="absolute z-10 w-full mt-1 top-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+        <div className="absolute z-10 w-full mt-1 top-full bg-white border border-gray-300 rounded-md shadow-lg overflow-y-auto">
           {dropdownOptions.map((item) => (
             <label
               key={item.id}
