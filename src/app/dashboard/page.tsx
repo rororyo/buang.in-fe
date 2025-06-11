@@ -4,10 +4,12 @@ import React from 'react';
 import { FaFileAlt, FaWineGlassAlt, FaTrashAlt } from 'react-icons/fa';
 import { FaBottleWater } from "react-icons/fa6";
 import Footer from '@/components/footer';
+import { useUser } from '@/lib/context/UserContext';
 
 const DashboardPage = () => {
-  const username = "Lorem Ipsum";
-  const saldo = 1500000;
+  const { user, loading } = useUser();
+  const username = user?.username || 'User';
+  const saldo = user?.points || 0; 
 
   return (
     <>
@@ -57,14 +59,14 @@ const DashboardPage = () => {
               </p>
             </div>
 
-            {/* Plastik */}
-            <div className="flex flex-col items-center bg-gray-100 p-4 rounded-lg shadow">
-              <FaBottleWater size={32} className="text-green-500 mb-2" />
-              <h4 className="text-md font-semibold text-gray-800">Plastik</h4>
-              <p className="text-sm text-black-600 text-center">
-                Kemasan, botol PET, toples, sedotan, tutup botol, dll.
-              </p>
-            </div>
+          {/* Plastik */}
+          <div className="flex flex-col items-center bg-gray-100 p-4 rounded-lg shadow" >
+            <FaBottleWater size={32} className="text-green-500 mb-2" />
+            <h4 className="text-md font-semibold text-gray-800">Plastik</h4>
+            <p className="text-sm text-black-600 text-center">
+              Kemasan, botol PET, toples, sedotan, tutup botol, dll.
+            </p>
+          </div>
 
             {/* Kaca */}
             <div className="flex flex-col items-center bg-gray-100 p-4 rounded-lg shadow">

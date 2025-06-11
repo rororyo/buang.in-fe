@@ -1,7 +1,8 @@
-'use client';
+"use client";
 
-import { createContext, useContext, useEffect, useState } from 'react';
-import api from '@/lib/api';
+import { createContext, useContext, useEffect, useState } from "react";
+import api from "@/lib/api";
+import Cookies from "js-cookie";
 
 interface User {
   id: string;
@@ -34,10 +35,12 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 
   const fetchCurrentUser = async () => {
     try {
-      const res = await api.get('/auth/current-user');
-      setUser(res.data);
+      const res = await api.get("/auth/current-user");
+      if (res.status == 200) {
+        setUser(res.data);
+      }
     } catch (err) {
-      console.error('Failed to fetch current user', err);
+      console.error("Failed to fetch current user", err);
       setUser(null);
     } finally {
       setLoading(false);
@@ -49,7 +52,9 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, loading, setUser, refreshUser: fetchCurrentUser }}>
+    <UserContext.Provider
+      value={{ user, loading, setUser, refreshUser: fetchCurrentUser }}
+    >
       {children}
     </UserContext.Provider>
   );
@@ -57,6 +62,6 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 
 export const useUser = () => {
   const context = useContext(UserContext);
-  if (!context) throw new Error('useUser must be used within a UserProvider');
+  if (!context) throw new Error("useUser must be used within a UserProvider");
   return context;
 };
