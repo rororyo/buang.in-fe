@@ -28,8 +28,8 @@ const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     <div className="mb-4">
       <button
         onClick={handleFotoClick}
-        className="w-full mt-7 p-2 text-black rounded-md hover:bg-opacity-90 items-center flex justify-center"
-        style={{ backgroundColor: "#276561" }}
+        className="w-full mt-7 p-2 text-white rounded-md hover:bg-opacity-90 items-center flex justify-center"
+        style={{ backgroundColor: "#000000" }}
       >
         <FaCamera size={25} className="mr-2" />
         Input Foto Sampah

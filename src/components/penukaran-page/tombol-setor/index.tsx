@@ -5,7 +5,7 @@ const TombolSetor = ({ onClick }: { onClick: () => void }) => (
     <button
       onClick={onClick}
       className="w-full p-2 font-semibold text-white rounded-md hover:bg-opacity-90"
-      style={{ backgroundColor: "#276561" }}
+      style={{ backgroundColor: "#000000" }}
     >
       Setor
     </button>

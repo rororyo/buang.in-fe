@@ -183,9 +183,9 @@ const FormInput: React.FC<FormInputProps> = ({
       <div className="mb-2 mt-6">
         <button
           onClick={() => setIsDrawerOpen(true)}
-          className="w-full p-2 text-black rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+          className="w-full p-2 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
           disabled={!lat || !lon}
-          style={{ backgroundColor: "#276561" }}
+          style={{ backgroundColor: "#000000" }}
         >
           {!lat || !lon
             ? "Memuat lokasi..."

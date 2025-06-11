@@ -106,14 +106,16 @@ const PenukaranPage = () => {
         </button>
         <h1 className="text-2xl font-bold text-black-500 text-center w-full">Penukaran</h1>
       </div>
-      <FormInput
-        lat={lat}
-        lon={lon}
-        formData={formData}
-        setFormData={setFormData}
-      />
-      <LokasiSetorSampah lat={lat} lon={lon} />
-      <TombolSetor onClick={handleSubmit} />
+      <div className="flex flex-col px-10">
+        <FormInput
+          lat={lat}
+          lon={lon}
+          formData={formData}
+          setFormData={setFormData}
+        />
+        <LokasiSetorSampah lat={lat} lon={lon} />
+        <TombolSetor onClick={handleSubmit} />
+      </div>
       <Footer />
     </div>
   );

@@ -70,7 +70,7 @@ const DropdownJenisSampah: React.FC<DropdownJenisSampahProps> = ({
         {selectedNames}
       </div>
       {isDropdownOpen && (
-        <div className="absolute z-10 w-full mt-1 top-full bg-white border border-gray-300 rounded-md shadow-lg overflow-y-auto">
+        <div className="absolute z-1 w-full mt-1 top-full bg-white border border-gray-300 rounded-md shadow-lg overflow-y-auto">
           {dropdownOptions.map((item) => (
             <label
               key={item.id}
