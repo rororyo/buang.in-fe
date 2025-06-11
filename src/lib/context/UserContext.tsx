@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import api from "@/lib/api";
-import Cookies from "js-cookie";
 
 interface User {
   id: string;
@@ -32,24 +31,55 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const fetchCurrentUser = async () => {
+    // Only access localStorage after component has mounted (client-side)
+    if (mounted) {
+      const cachedUser = localStorage.getItem("user");
+      if (cachedUser) {
+        try {
+          setUser(JSON.parse(cachedUser));
+          setLoading(false); // show UI immediately with cached data
+        } catch (error) {
+          localStorage.removeItem("user");
+        }
+      }
+    }
+
     try {
+      // Attempt fresh fetch in background
       const res = await api.get("/auth/current-user");
-      if (res.status == 200) {
+      if (res.status === 200) {
         setUser(res.data);
+        if (mounted) {
+          localStorage.setItem("user", JSON.stringify(res.data)); // update cache
+        }
+      } else {
+        setUser(null);
+        if (mounted) {
+          localStorage.removeItem("user");
+        }
       }
     } catch (err) {
-      console.error("Failed to fetch current user", err);
       setUser(null);
+      if (mounted) {
+        localStorage.removeItem("user");
+      }
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchCurrentUser();
-  }, []);
+    if (mounted) {
+      fetchCurrentUser();
+    }
+  }, [mounted]);
 
   return (
     <UserContext.Provider

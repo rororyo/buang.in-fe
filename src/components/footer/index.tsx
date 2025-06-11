@@ -1,21 +1,15 @@
+import { usePathname,useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { FaHome, FaRecycle, FaHistory, FaUser } from 'react-icons/fa';
 
 const Footer = () => {
-  const [currentPath, setCurrentPath] = useState<string>("");
+  const router = useRouter();
+  const pathname = usePathname();
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setCurrentPath(window.location.pathname);
-    }
-  }, []);
-
-  const isActivePage = (path: string) => currentPath === path;
+  const isActivePage = (path: string) => pathname === path;
 
   const navigate = (path: string) => {
-    if (typeof window !== "undefined") {
-      window.location.href = path;
-    }
+    router.push(path);
   };
 
   return (
