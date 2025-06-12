@@ -54,7 +54,7 @@ const FormInput: React.FC<FormInputProps> = ({
           onChange={(e) => setFormData({ ...formData, nama: e.target.value })}
           className="w-full p-2 mt-1 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
           placeholder="Masukkan nama Anda"
-          style={{ backgroundColor: "#569490" }}
+          style={{ backgroundColor: "#ffffff" }}
         />
       </div>
 
@@ -73,7 +73,7 @@ const FormInput: React.FC<FormInputProps> = ({
           onChange={(e) => setFormData({ ...formData, alamat: e.target.value })}
           className="w-full p-2 mt-1 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
           placeholder="Masukkan alamat Anda"
-          style={{ backgroundColor: "#569490" }}
+          style={{ backgroundColor: "#ffffff" }}
         />
       </div>
       {/* Phone Number */}
@@ -88,7 +88,7 @@ const FormInput: React.FC<FormInputProps> = ({
         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
         className="w-full p-2 mt-1 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
         placeholder="Nomor Telepon"
-        style={{ backgroundColor: "#569490" }}
+        style={{ backgroundColor: "#ffffff" }}
       />
       </div>
 
@@ -106,7 +106,7 @@ const FormInput: React.FC<FormInputProps> = ({
         onChange={(e) =>
           setFormData({ ...formData, pickupTime: e.target.value })
         }
-        style={{ backgroundColor: "#569490" }}
+        style={{ backgroundColor: "#ffffff" }}
         className="w-full p-2 mt-1 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
       />
       </div>
@@ -123,21 +123,7 @@ const FormInput: React.FC<FormInputProps> = ({
         }
       />
       </div>
-
-      {/* Berat */}
-      <div className="mb-4">
-        <label htmlFor="berat" className="block text-sm font-medium text-black">
-          Berat
-        </label>
-        <input
-          type="number"
-          id="berat"
-          className="w-full p-2 mt-1 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
-          placeholder="Masukkan berat sampah (kg)"
-          style={{ backgroundColor: "#569490" }}
-        />
-      </div>
-
+      
       {/* Tombol Foto */}
 <TombolFoto
   onImageSelected={(file, previewUrl) => {
@@ -194,12 +180,12 @@ const FormInput: React.FC<FormInputProps> = ({
       )}
 
       {/* Button to open nearby trash banks drawer */}
-      <div className="mb-4">
+      <div className="mb-2 mt-6">
         <button
           onClick={() => setIsDrawerOpen(true)}
-          className="w-full p-2 text-black rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+          className="w-full p-2 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
           disabled={!lat || !lon}
-          style={{ backgroundColor: "#569490" }}
+          style={{ backgroundColor: "#000000" }}
         >
           {!lat || !lon
             ? "Memuat lokasi..."
