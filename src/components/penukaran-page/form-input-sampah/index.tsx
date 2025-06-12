@@ -14,7 +14,6 @@ interface FormInputProps {
     phone: string;
     pickupTime: string;
     selectedTrashes: any[];
-    berat: number;
     selectedImage: any;
     selectedImagePreview: string;
     selectedTrashBank: any;
@@ -25,7 +24,6 @@ interface FormInputProps {
     phone: string;
     pickupTime: string;
     selectedTrashes: any[];
-    berat: number;
     selectedImage: any;
     selectedImagePreview: string;
     selectedTrashBank: any;
@@ -96,7 +94,7 @@ const FormInput: React.FC<FormInputProps> = ({
       {/* Pickup Time */}
       <div className="mb-4">
       <label htmlFor="pickupTime" className="block text-sm font-medium text-black">
-        Waktu Setor
+        Waktu Pengambilan
       </label>
         <input
         type="datetime-local"

@@ -24,7 +24,6 @@ const PenukaranPage = () => {
     phone: string;
     pickupTime: string;
     selectedTrashes: any[];
-    berat: number;
     selectedImage: any;
     selectedImagePreview: any;
     selectedTrashBank: any;
@@ -34,7 +33,6 @@ const PenukaranPage = () => {
     phone: "",
     pickupTime: "",
     selectedTrashes: [],
-    berat: 0,
     selectedImage: null,
     selectedImagePreview: null,
     selectedTrashBank: null,
@@ -48,7 +46,6 @@ const PenukaranPage = () => {
       form.append("phone_number", formData.phone);
       form.append("pickup_time", formData.pickupTime);
       form.append("trash_type_ids", JSON.stringify(formData.selectedTrashes));
-      form.append("total_weight", formData.berat.toString());
       form.append("status", "pending");
       form.append(
         "latitude",
