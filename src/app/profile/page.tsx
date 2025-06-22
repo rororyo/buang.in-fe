@@ -10,6 +10,9 @@ type ProfileType = {
   username: string;
   email: string;
   createdAt: string;
+  gender: string;
+  birthday: string;
+  phone_Number: string;
   jumlahPenukaran: number;
   photoUrl: string;
   role: string;
@@ -21,6 +24,9 @@ const ProfilPage = () => {
   const username = user?.username || 'User';
   const email = user?.email || 'Email';
   const createdAt = user?.created_at || '1970-01-01';
+  const gender = user?.gender || 'Belum mengisi jenis kelamin';
+  const birthday = user?.birthday || 'Belum mengisi tanggal lahir';
+  const phone_Number = user?.phone_number || 'Belum mengisi nomor telepon';
   const dateOnly = createdAt.split('T')[0]; // "2025-06-11"
   const role = user?.role || 'user';
   const alamat = user?.address || 'Belum ada alamat';
@@ -48,13 +54,24 @@ const defaultProfile: ProfileType = {
   username: username,
   email: email,
   createdAt: dateOnly,
+  gender: gender,
+  birthday: birthday,
+  phone_Number: phone_Number,
   jumlahPenukaran: 5,
   photoUrl: "https://via.placeholder.com/150",
   role: role,
   alamat: alamat
 };
 
-  const profile: ProfileType = user && 'createdAt' in user && 'jumlahPenukaran' in user && 'photoUrl' in user && 'role' in user && 'alamat' in user
+  const profile: ProfileType = user &&
+  'createdAt' in user &&
+  'jumlahPenukaran' in user &&
+  'gender' in user &&
+  'birthday' in user &&
+  'phone_Number' in user &&
+  'photoUrl' in user &&
+  'role' in user &&
+  'alamat' in user
   ? user as ProfileType
   : defaultProfile;
 
@@ -145,7 +162,7 @@ const defaultProfile: ProfileType = {
       <div className="w-full max-w-2xl p-12 mt-10 bg-white rounded-lg shadow-md">
         {/* Profile Section */}
         <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-600">Account</h3>
+          <h3 className="text-lg font-semibold text-gray-600">Detail Akun</h3>
           <div className="flex items-center justify-between mt-2 pl-2 text-gray-700">
             <div>
               <span className="mr-2"></span>
@@ -157,7 +174,9 @@ const defaultProfile: ProfileType = {
                   className="border px-2 py-1 rounded"
                 />
               ) : (
-                <span>{profile.username}</span>
+                <div className="pl-2 text-gray-600">
+                  <span className="font-semibold text-black">Username: </span> {profile.username}
+                </div>
               )}
             </div>
             {editUsername ? (
@@ -178,19 +197,25 @@ const defaultProfile: ProfileType = {
             )}
           </div>
           <div className="mt-2 pl-4 text-gray-600">
-            <span className="font-semibold text-black"></span> {profile.email}
+            <span className="font-semibold text-black">Email: </span> {profile.email}
           </div>
           <div className="mt-2 pl-4 text-gray-600">
-            <span className="font-semibold text-black"></span> {profile.createdAt}
+            <span className="font-semibold text-black">Nomor Telepon: </span> {profile.phone_Number}
+          </div>
+          <div className="mt-2 pl-4 text-gray-600">
+            <span className="font-semibold text-black">Jenis Kelamin: </span> {profile.gender}
           </div>
           <div className='mt-2 pl-4 text-gray-600'>
-            <span className="font-semibold text-black"></span> {profile.alamat}
+            <span className="font-semibold text-black">Alamat: </span> {profile.alamat}
+          </div>
+          <div className="mt-2 pl-4 text-gray-600">
+            <span className="font-semibold text-black">Tanggal Lahir: </span> {profile.birthday}
           </div>
         </div>
-
+        <hr className="my-8 border-t-2 border-gray-300" />
         {/* Notifications Section */}
         <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-700">Notifications</h3>
+          <h3 className="text-lg font-semibold text-gray-700">Notifikasi</h3>
           <div className="flex items-center justify-between mt-2">
             <div className="flex items-center space-x-2">
               <BellIcon size={16} className="text-gray-500" />
@@ -211,10 +236,10 @@ const defaultProfile: ProfileType = {
             </div>
           </div>
         </div>
-
+        <hr className="my-8 border-t-2 border-gray-300" />
         {/* Security Section */}
         <div className='mb-6'>
-          <h3 className="text-lg font-semibold text-gray-700">Security</h3>
+          <h3 className="text-lg font-semibold text-gray-700">Keamanan</h3>
           <div
             className="flex items-center justify-between mt-2 cursor-pointer"
             onClick={handlePasswordClick}
@@ -236,10 +261,10 @@ const defaultProfile: ProfileType = {
             <ChevronRightIcon size={16} className="text-gray-500" />
           </div>
         </div>
-
+        <hr className="my-8 border-t-2 border-gray-300" />
         {/* Admin Section */}
         <div>
-          <h3 className='text-lg font-semibold text-gray-700'>Login Admin</h3>
+          <h3 className='text-lg font-semibold text-gray-700'>Masuk Sebagai Admin</h3>
           <div
             className='flex items-center justify-between mt-2 cursor-pointer'
             onClick={handleAdminLogin}
