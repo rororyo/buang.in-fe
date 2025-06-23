@@ -14,7 +14,7 @@ const Footer = () => {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 w-full bg-white shadow-md z-10">
+    <div className="fixed bottom-0 left-0 w-full bg-white [box-shadow:0_-4px_6px_-1px_rgba(0,0,0,0.1),0_-2px_4px_-1px_rgba(0,0,0,0.06)] z-10">
       <div className="flex justify-around py-2">
         {/* Dashboard */}
         <button
