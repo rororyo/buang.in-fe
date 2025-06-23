@@ -391,7 +391,7 @@ const AdminPage = () => {
                      selected.status === 'accepted' ? 'Diterima' : 'Ditolak'}
                   </span>
                 </p>
-                <p><span className="font-semibold">Total Berat:</span> {selected.total_weight} kg</p>
+                <p><span className="font-semibold">Total Berat:</span> {selected.total_weight} gram</p>
                 <p><span className="font-semibold">Alamat:</span> {selected.address}</p>
                 <p><span className="font-semibold">No. Telepon:</span> {selected.phone_number}</p>
                 <p><span className="font-semibold">Lokasi Pickup:</span> {selected.pickup_location.coordinates[1]}, {selected.pickup_location.coordinates[0]}</p>

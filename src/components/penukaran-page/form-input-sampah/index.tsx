@@ -13,6 +13,7 @@ interface FormInputProps {
     alamat: string;
     phone: string;
     pickupTime: string;
+    totalWeight: number;
     selectedTrashes: any[];
     selectedImage: any;
     selectedImagePreview: string;
@@ -23,6 +24,7 @@ interface FormInputProps {
     alamat: string;
     phone: string;
     pickupTime: string;
+    totalWeight: number;
     selectedTrashes: any[];
     selectedImage: any;
     selectedImagePreview: string;
@@ -122,6 +124,25 @@ const FormInput: React.FC<FormInputProps> = ({
       />
       </div>
       
+      {/* Berat Sampah */}
+      <div className="mb-4">
+        <label
+          htmlFor="berat"
+          className="block text-sm font-medium text-black"
+        >
+          Berat Sampah (gram)
+        </label>
+        <input
+          type="number"
+          id="berat"
+          value={formData.totalWeight}
+          onChange={(e) => setFormData({ ...formData, totalWeight: parseInt(e.target.value) })}
+          className="w-full p-2 mt-1 border border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500"
+          placeholder="Masukkan berat sampah"
+          style={{ backgroundColor: "#ffffff" }}
+        />
+      </div>
+
       {/* Tombol Foto */}
 <TombolFoto
   onImageSelected={(file, previewUrl) => {
