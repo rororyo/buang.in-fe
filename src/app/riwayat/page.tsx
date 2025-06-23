@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { CheckCircle, ChevronLeftIcon, ChevronRightIcon, Loader } from "lucide-react";
+import { CheckCircle, ChevronLeftIcon, ChevronRightIcon, Loader, XCircle } from "lucide-react";
 import Footer from "@/components/footer";
 import Image from "next/image";
 import { fetchRiwayat } from "@/lib/api/riwayat";
@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 type Riwayat = {
   id: string;
   image: string;
-  status: 'Selesai' | 'Sedang diproses';
+  status: 'Selesai' | 'Sedang diproses' | 'Ditolak';
   date: string;
   points?: number;
 };
@@ -28,7 +28,7 @@ export default function TransactionHistory() {
         const mapped = data.map((item: any) => ({
           id: item.id,
           image: item.img_url ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${item.img_url}` : "https://via.placeholder.com/200x200?text=No+Image",
-          status: item.status === "accepted" ? "Selesai" : "Sedang diproses",
+          status: item.status === "accepted" ? "Selesai" : item.status === "rejected" ? "Ditolak" : "Sedang diproses",
           date: new Date(item.created_at).toLocaleDateString("id-ID", {
             day: '2-digit', month: 'short', year: 'numeric'
           }),
@@ -74,7 +74,7 @@ export default function TransactionHistory() {
               <div className="flex-1">
                 <p
                   className={`text-sm font-semibold ${
-                    riwayat.status === 'Selesai' ? 'text-green-600' : 'text-cyan-700'
+                    riwayat.status === 'Selesai' ? 'text-green-600' : riwayat.status === 'Ditolak' ? 'text-red-600' : 'text-cyan-700'
                   }`}
                 >
                   {riwayat.status}
@@ -98,7 +98,9 @@ export default function TransactionHistory() {
                 </button>
                 {riwayat.status === 'Selesai' ? (
                   <CheckCircle className="text-green-500 mt-2" size={20} />
-                ) : (
+                ) : riwayat.status === 'Ditolak' ? (
+                  <XCircle className="text-red-500 mt-2" size={20} />
+                ) :(
                   <Loader className="text-cyan-700 animate-spin mt-2" size={20} />
                 )}
               </div>
