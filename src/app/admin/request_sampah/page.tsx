@@ -22,6 +22,7 @@ interface PickupRequest {
   created_at: string;
   user_id: string;
   trash_bank_id: string;
+  sub_district_id?: string;
   user: {
     id: string;
     username: string;
@@ -42,6 +43,11 @@ interface PickupRequest {
   };
 }
 
+interface SubDistrict {
+  id: string;
+  name: string;
+}
+
 interface ApiResponse {
   status: string;
   message: string;
@@ -58,13 +64,33 @@ const AdminPage = () => {
   const [filterNama, setFilterNama] = useState("");
   const [filterTanggal, setFilterTanggal] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [subDistrictFilter, setSubDistrictFilter] = useState("");
   const [data, setData] = useState<PickupRequest[]>([]);
+  const [subDistricts, setSubDistricts] = useState<SubDistrict[]>([]);
   const [selected, setSelected] = useState<PickupRequest | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingSubDistricts, setLoadingSubDistricts] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [processingId, setProcessingId] = useState<string | null>(null);
+
+  // Fetch sub-districts
+  const fetchSubDistricts = async () => {
+    setLoadingSubDistricts(true);
+    try {
+      const response = await api.get('/api/setor/sub-districts');
+      
+      if (response.status === 200) {
+        setSubDistricts(response.data);
+      }
+    } catch (err: any) {
+      console.error('Error fetching sub-districts:', err);
+      // Don't show error for sub-districts fetch as it's not critical
+    } finally {
+      setLoadingSubDistricts(false);
+    }
+  };
 
   // Fetch pickup requests
   const fetchPickupRequests = async (currentPage = 1) => {
@@ -82,6 +108,10 @@ const AdminPage = () => {
         params.status = statusFilter;
       }
 
+      if (subDistrictFilter) {
+        params.sub_district_id = subDistrictFilter;
+      }
+
       const response = await api.get<ApiResponse>('/api/bank-sampah/setor-request', { params });
       
       if (response.data.status === 'success') {
@@ -90,6 +120,7 @@ const AdminPage = () => {
         setPage(response.data.metadata.page);
       }
     } catch (err: any) {
+      console.error('Error fetching pickup requests:', err);
       setError(err.response?.data?.message || 'Failed to fetch pickup requests');
     } finally {
       setLoading(false);
@@ -120,6 +151,7 @@ const AdminPage = () => {
         }
       }
     } catch (err: any) {
+      console.error(`Error ${status} request:`, err);
       setError(err.response?.data?.message || `Failed to ${status} request`);
     } finally {
       setProcessingId(null);
@@ -136,8 +168,11 @@ const AdminPage = () => {
     
     const dateMatch = !filterTanggal || 
       item.created_at.includes(filterTanggal);
+
+    const subDistrictMatch = !subDistrictFilter || 
+      item.sub_district_id === subDistrictFilter;
     
-    return nameMatch && dateMatch;
+    return nameMatch && dateMatch && subDistrictMatch;
   });
 
   // Format date for display
@@ -145,10 +180,20 @@ const AdminPage = () => {
     return new Date(dateString).toLocaleDateString('id-ID');
   };
 
+  // Get sub-district name by ID
+  const getSubDistrictName = (subDistrictId: string) => {
+    const subDistrict = subDistricts.find(sd => sd.id === subDistrictId);
+    return subDistrict ? subDistrict.name : 'Unknown';
+  };
+
   // Load data on component mount and when filters change
   useEffect(() => {
+    fetchSubDistricts();
+  }, []);
+
+  useEffect(() => {
     fetchPickupRequests();
-  }, [statusFilter]);
+  }, [statusFilter, subDistrictFilter]);
 
   // Pagination handlers
   const handlePrevPage = () => {
@@ -253,6 +298,20 @@ const AdminPage = () => {
                   <option value="rejected">Ditolak</option>
                 </select>
 
+                <select
+                  value={subDistrictFilter}
+                  onChange={(e) => setSubDistrictFilter(e.target.value)}
+                  disabled={loadingSubDistricts}
+                  className="border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 disabled:opacity-50"
+                >
+                  <option value="">Semua Kecamatan</option>
+                  {subDistricts.map((subDistrict) => (
+                    <option key={subDistrict.id} value={subDistrict.id}>
+                      {subDistrict.name}
+                    </option>
+                  ))}
+                </select>
+
                 <button
                   onClick={() => fetchPickupRequests(page)}
                   disabled={loading}
@@ -279,6 +338,7 @@ const AdminPage = () => {
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="py-4 px-6 text-left font-semibold text-gray-900">Nama User</th>
+                      <th className="py-4 px-6 text-left font-semibold text-gray-900">Kecamatan</th>
                       <th className="py-4 px-6 text-left font-semibold text-gray-900">Tanggal</th>
                       <th className="py-4 px-6 text-left font-semibold text-gray-900">Status</th>
                       <th className="py-4 px-6 text-left font-semibold text-gray-900">Detail</th>
@@ -288,7 +348,7 @@ const AdminPage = () => {
                   <tbody className="divide-y divide-gray-200">
                     {filteredData.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="text-center py-12 text-gray-500">
+                        <td colSpan={6} className="text-center py-12 text-gray-500">
                           <div className="flex flex-col items-center">
                             <div className="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center mb-4">
                               <Search size={24} className="text-gray-400" />
@@ -303,6 +363,9 @@ const AdminPage = () => {
                         <tr key={item.id} className="hover:bg-gray-50">
                           <td className="py-4 px-6">
                             <div className="font-medium text-gray-900">{item.user.username}</div>
+                          </td>
+                          <td className="py-4 px-6 text-gray-600">
+                            {item.sub_district_id ? getSubDistrictName(item.sub_district_id) : 'N/A'}
                           </td>
                           <td className="py-4 px-6 text-gray-600">{formatDate(item.created_at)}</td>
                           <td className="py-4 px-6">
@@ -447,6 +510,13 @@ const AdminPage = () => {
                     <div className="bg-gray-50 rounded-lg p-4">
                       <label className="text-sm font-medium text-gray-500">Email</label>
                       <p className="text-lg text-gray-900">{selected.user.email}</p>
+                    </div>
+                    
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <label className="text-sm font-medium text-gray-500">Kecamatan</label>
+                      <p className="text-lg text-gray-900">
+                        {selected.sub_district_id ? getSubDistrictName(selected.sub_district_id) : 'N/A'}
+                      </p>
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4">
