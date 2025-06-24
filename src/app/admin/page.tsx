@@ -1,438 +1,144 @@
-"use client";
+'use client';
+import React from 'react';
+import { useRouter } from 'next/navigation';
+import { Package, Gift } from 'lucide-react';
 
-import React, { useState, useEffect } from "react";
-import { FilterIcon, CheckIcon, XIcon, SearchIcon, EyeIcon, XCircleIcon, RefreshCw } from "lucide-react";
-import api from "@/lib/api";
-import { toast } from "react-toastify";
+export default function AdminLanding() {
+  const router = useRouter();
 
-interface PickupRequest {
-  id: string;
-  name: string;
-  address: string;
-  total_weight: number;
-  img_url: string;
-  status: 'pending' | 'accepted' | 'rejected';
-  phone_number: string;
-  pickup_location: {
-    type: string;
-    coordinates: [number, number];
-  };
-  pickup_time: string;
-  created_at: string;
-  user_id: string;
-  trash_bank_id: string;
-  user: {
-    id: string;
-    username: string;
-    email: string;
-    role: string;
-    points: number;
-    created_at: string;
-  };
-  trashBank: {
-    id: string;
-    username: string;
-    email: string;
-    role: string;
-    location: {
-      type: string;
-      coordinates: [number, number];
-    };
-  };
-}
-
-interface ApiResponse {
-  status: string;
-  message: string;
-  data: PickupRequest[];
-  metadata: {
-    page: number;
-    size: number;
-    total_item: number;
-    total_page: number;
-  };
-}
-
-const AdminPage = () => {
-  const [filterNama, setFilterNama] = useState("");
-  const [filterTanggal, setFilterTanggal] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [data, setData] = useState<PickupRequest[]>([]);
-  const [selected, setSelected] = useState<PickupRequest | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [processingId, setProcessingId] = useState<string | null>(null);
-
-  // Fetch pickup requests
-  const fetchPickupRequests = async (currentPage = 1) => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const params: any = {
-        page: currentPage,
-        limit: 10,
-        orderBy: 'desc'
-      };
-      
-      if (statusFilter) {
-        params.status = statusFilter;
-      }
-
-      const response = await api.get<ApiResponse>('/api/bank-sampah/setor-request', { params });
-      
-      if (response.data.status === 'success') {
-        setData(response.data.data);
-        setTotalPages(response.data.metadata.total_page);
-        setPage(response.data.metadata.page);
-      }
-    } catch (err: any) {
-      console.error('Error fetching pickup requests:', err);
-      setError(err.response?.data?.message || 'Failed to fetch pickup requests');
-    } finally {
-      setLoading(false);
-    }
+  const handlePickupRequests = () => {
+    router.push('/admin/request_sampah');
   };
 
-  // Handle accept/reject request
-  const handleRequestAction = async (id: string, status: 'accepted' | 'rejected') => {
-    setProcessingId(id);
-    
-    try {
-      const response = await api.post(`/api/bank-sampah/setor-request/${id}?status=${status}`);
-      
-      if (response.data.status === 'success') {
-        // Update local state
-        setData(prev => 
-          prev.map(item => 
-            item.id === id ? { ...item, status } : item
-          )
-        );
-        
-        // Show success message (you can implement toast notifications)
-        toast.success(`Request ${status === 'accepted' ? 'accepted' : 'rejected'} successfully`);
-        
-        // Close modal if currently viewing this request
-        if (selected?.id === id) {
-          setSelected({ ...selected, status });
-        }
-      }
-    } catch (err: any) {
-      console.error(`Error ${status} request:`, err);
-      setError(err.response?.data?.message || `Failed to ${status} request`);
-    } finally {
-      setProcessingId(null);
-    }
-  };
-
-  const handleTerima = (id: string) => handleRequestAction(id, 'accepted');
-  const handleTolak = (id: string) => handleRequestAction(id, 'rejected');
-
-  // Filter data based on search criteria
-  const filteredData = data.filter(item => {
-    const nameMatch = !filterNama || 
-      item.user.username.toLowerCase().includes(filterNama.toLowerCase());
-    
-    const dateMatch = !filterTanggal || 
-      item.created_at.includes(filterTanggal);
-    
-    return nameMatch && dateMatch;
-  });
-
-  // Format date for display
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('id-ID');
-  };
-
-  // Load data on component mount and when filters change
-  useEffect(() => {
-    fetchPickupRequests();
-  }, [statusFilter]);
-
-  // Pagination handlers
-  const handlePrevPage = () => {
-    if (page > 1) {
-      fetchPickupRequests(page - 1);
-    }
-  };
-
-  const handleNextPage = () => {
-    if (page < totalPages) {
-      fetchPickupRequests(page + 1);
-    }
+  const handleRedeemPointsRequest = () => {
+    router.push('/admin/request_penukaran');
   };
 
   return (
-    <div className="flex flex-col items-center min-h-screen" style={{ backgroundColor: "#569490" }}>
-      {/* Header Admin */}
-      <div className="fixed w-full items-center justify-between p-4 bg-white shadow-md z-50" style={{ backgroundColor: "#235C58" }}>
-        <h1 className="text-2xl font-bold text-white text-center w-full">Bank Sampah - Verifikasi Sampah</h1>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-green-900 to-slate-900">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-10 -left-10 w-72 h-72 bg-green-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+        <div className="absolute top-10 right-10 w-72 h-72 bg-emerald-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse animation-delay-2000"></div>
+        <div className="absolute -bottom-10 left-20 w-72 h-72 bg-teal-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse animation-delay-4000"></div>
       </div>
-      
+
+      {/* Header */}
+      <header className="relative z-10 pt-8 pb-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
+              Panel
+              <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent ml-4">
+                Admin
+              </span>
+            </h1>
+            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+              Kelola permintaan pickup dan penukaran poin
+            </p>
+          </div>
+        </div>
+      </header>
+
       {/* Main Content */}
-      <div className="w-full mt-20 max-w-6xl bg-white p-6 rounded-lg shadow-md mb-10">
-        {/* Error Display */}
-        {error && (
-          <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-md flex justify-between items-center">
-            <span>{error}</span>
-            <button onClick={() => setError(null)} className="text-red-500 hover:text-red-700">
-              <XIcon size={20} />
-            </button>
-          </div>
-        )}
-
-        {/* Filters */}
-        <div className="flex flex-col md:flex-row md:items-center md:space-x-4 mb-4 gap-2">
-          <div className="flex items-center gap-2">
-            <SearchIcon size={18} className="text-gray-500" />
-            <input
-              type="text"
-              placeholder="Cari nama user..."
-              value={filterNama}
-              onChange={(e) => setFilterNama(e.target.value)}
-              className="border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-green-500 focus:border-green-500"
-            />
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <FilterIcon size={18} className="text-gray-500" />
-            <input
-              type="date"
-              value={filterTanggal}
-              onChange={(e) => setFilterTanggal(e.target.value)}
-              className="border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-green-500 focus:border-green-500"
-            />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-green-500 focus:border-green-500"
-            >
-              <option value="">Semua Status</option>
-              <option value="pending">Pending</option>
-              <option value="accepted">Diterima</option>
-              <option value="rejected">Ditolak</option>
-            </select>
-          </div>
-
-          <button
-            onClick={() => fetchPickupRequests(page)}
-            disabled={loading}
-            className="flex items-center gap-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded disabled:opacity-50"
-          >
-            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-            Refresh
-          </button>
-        </div>
-
-        {/* Loading State */}
-        {loading && (
-          <div className="text-center py-8">
-            <RefreshCw size={24} className="animate-spin mx-auto mb-2" />
-            <p className="text-gray-500">Memuat data...</p>
-          </div>
-        )}
-
-        {/* Table */}
-        {!loading && (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm text-left">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="py-2 px-4">Nama User</th>
-                  <th className="py-2 px-4">Tanggal</th>
-                  <th className="py-2 px-4">Status</th>
-                  <th className="py-2 px-4">Detail</th>
-                  <th className="py-2 px-4 text-center">Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredData.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="text-center py-4 text-gray-400">
-                      Tidak ada data.
-                    </td>
-                  </tr>
-                ) : (
-                  filteredData.map((item) => (
-                    <tr key={item.id} className="border-b">
-                      <td className="py-2 px-4">{item.user.username}</td>
-                      <td className="py-2 px-4">{formatDate(item.created_at)}</td>
-                      <td className="py-2 px-4">
-                        <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                          item.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                          item.status === 'accepted' ? 'bg-green-100 text-green-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
-                          {item.status === 'pending' ? 'Menunggu' :
-                           item.status === 'accepted' ? 'Diterima' : 'Ditolak'}
-                        </span>
-                      </td>
-                      <td className="py-2 px-4">
-                        <button
-                          onClick={() => setSelected(item)}
-                          className="flex items-center gap-1 text-blue-600 hover:underline"
-                        >
-                          <EyeIcon size={16} /> Lihat Detail
-                        </button>
-                      </td>
-                      <td className="py-2 px-4 flex gap-2 justify-center">
-                        {item.status === "pending" ? (
-                          <>
-                            <button
-                              onClick={() => handleTerima(item.id)}
-                              disabled={processingId === item.id}
-                              className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded flex items-center gap-1 disabled:opacity-50"
-                            >
-                              {processingId === item.id ? (
-                                <RefreshCw size={16} className="animate-spin" />
-                              ) : (
-                                <CheckIcon size={16} />
-                              )}
-                              Terima
-                            </button>
-                            <button
-                              onClick={() => handleTolak(item.id)}
-                              disabled={processingId === item.id}
-                              className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded flex items-center gap-1 disabled:opacity-50"
-                            >
-                              {processingId === item.id ? (
-                                <RefreshCw size={16} className="animate-spin" />
-                              ) : (
-                                <XIcon size={16} />
-                              )}
-                              Tolak
-                            </button>
-                          </>
-                        ) : item.status === "accepted" ? (
-                          <span className="text-green-600 font-semibold">Diterima</span>
-                        ) : (
-                          <span className="text-red-600 font-semibold">Ditolak</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* Pagination */}
-        {!loading && totalPages > 1 && (
-          <div className="flex justify-center items-center mt-4 gap-4">
-            <button
-              onClick={handlePrevPage}
-              disabled={page <= 1}
-              className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50 hover:bg-gray-300"
-            >
-              Previous
-            </button>
-            <span className="text-sm text-gray-600">
-              Page {page} of {totalPages}
-            </span>
-            <button
-              onClick={handleNextPage}
-              disabled={page >= totalPages}
-              className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50 hover:bg-gray-300"
-            >
-              Next
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* Modal Detail */}
-      {selected && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div
-            className="absolute inset-0 bg-black bg-opacity-50"
-            onClick={() => setSelected(null)}
-          />
-          <div className="relative bg-white rounded-xl shadow-2xl p-8 w-full max-w-2xl z-10 flex flex-col md:flex-row gap-8 border-2 border-green-200">
-            <button
-              className="absolute top-4 right-4 text-gray-500 hover:text-red-500 z-20"
-              onClick={() => setSelected(null)}
-            >
-              <XCircleIcon size={28} />
-            </button>
+      <main className="relative z-10 flex-1 py-12">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             
-            <div className="flex flex-col items-center md:items-start md:w-1/3">
-              <img
-                src={selected.img_url ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${selected.img_url}` : "https://via.placeholder.com/200x200?text=No+Image"}
-                alt="Foto Sampah"
-                className="w-48 h-48 object-cover rounded-lg border mb-4"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = "https://via.placeholder.com/200x200?text=No+Image";
-                }}
-              />
-            </div>
-            
-            <div className="flex-1 flex flex-col justify-center">
-              <h2 className="text-2xl font-bold mb-4 text-center md:text-left text-green-700">
-                Detail Pengiriman Sampah
-              </h2>
-              <div className="space-y-2 text-base">
-                <p><span className="font-semibold">Nama:</span> {selected.user.username}</p>
-                <p><span className="font-semibold">Email:</span> {selected.user.email}</p>
-                <p><span className="font-semibold">Tanggal Pengajuan:</span> {formatDate(selected.created_at)}</p>
-                <p><span className="font-semibold">Waktu Pickup:</span> {formatDate(selected.pickup_time)}</p>
-                <p><span className="font-semibold">Status:</span> 
-                  <span className={`ml-2 px-2 py-1 rounded text-xs font-semibold ${
-                    selected.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                    selected.status === 'accepted' ? 'bg-green-100 text-green-800' :
-                    'bg-red-100 text-red-800'
-                  }`}>
-                    {selected.status === 'pending' ? 'Menunggu' :
-                     selected.status === 'accepted' ? 'Diterima' : 'Ditolak'}
-                  </span>
-                </p>
-                <p><span className="font-semibold">Total Berat:</span> {selected.total_weight} gram</p>
-                <p><span className="font-semibold">Alamat:</span> {selected.address}</p>
-                <p><span className="font-semibold">No. Telepon:</span> {selected.phone_number}</p>
-                <p><span className="font-semibold">Lokasi Pickup:</span> {selected.pickup_location.coordinates[1]}, {selected.pickup_location.coordinates[0]}</p>
-                <p><span className="font-semibold">Poin User:</span> {selected.user.points}</p>
-              </div>
-              
-              {/* Action buttons in modal */}
-              {selected.status === 'pending' && (
-                <div className="flex gap-2 mt-4">
-                  <button
-                    onClick={() => handleTerima(selected.id)}
-                    disabled={processingId === selected.id}
-                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded flex items-center gap-2 disabled:opacity-50"
-                  >
-                    {processingId === selected.id ? (
-                      <RefreshCw size={16} className="animate-spin" />
-                    ) : (
-                      <CheckIcon size={16} />
-                    )}
-                    Terima
-                  </button>
-                  <button
-                    onClick={() => handleTolak(selected.id)}
-                    disabled={processingId === selected.id}
-                    className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded flex items-center gap-2 disabled:opacity-50"
-                  >
-                    {processingId === selected.id ? (
-                      <RefreshCw size={16} className="animate-spin" />
-                    ) : (
-                      <XIcon size={16} />
-                    )}
-                    Tolak
-                  </button>
+            {/* Pickup Requests Button */}
+            <div className="group relative">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+              <button
+                onClick={handlePickupRequests}
+                className="relative w-full h-64 bg-gray-900/50 backdrop-blur-xl rounded-2xl p-8 border border-gray-800 hover:border-green-500/50 transition-all duration-300 group-hover:scale-105 group-hover:shadow-2xl group-hover:shadow-green-500/25"
+              >
+                <div className="flex flex-col items-center justify-center h-full space-y-6">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-green-500 rounded-full blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
+                    <div className="relative bg-gradient-to-br from-green-500 to-emerald-500 p-4 rounded-full">
+                      <Package className="w-12 h-12 text-white" />
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <h2 className="text-2xl font-bold text-white mb-2 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-green-400 group-hover:to-emerald-400 group-hover:bg-clip-text transition-all duration-300">
+                      Permintaan Pickup
+                    </h2>
+                    <p className="text-gray-400 group-hover:text-gray-300 transition-colors duration-300">
+                      Kelola dan proses permintaan pickup sampah dari pengguna
+                    </p>
+                  </div>
                 </div>
-              )}
+              </button>
+            </div>
+
+            {/* Redeem Points Request Button */}
+            <div className="group relative">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-teal-600 to-green-600 rounded-2xl blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+              <button
+                onClick={handleRedeemPointsRequest}
+                className="relative w-full h-64 bg-gray-900/50 backdrop-blur-xl rounded-2xl p-8 border border-gray-800 hover:border-teal-500/50 transition-all duration-300 group-hover:scale-105 group-hover:shadow-2xl group-hover:shadow-teal-500/25"
+              >
+                <div className="flex flex-col items-center justify-center h-full space-y-6">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-teal-500 rounded-full blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
+                    <div className="relative bg-gradient-to-br from-teal-500 to-green-500 p-4 rounded-full">
+                      <Gift className="w-12 h-12 text-white" />
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <h2 className="text-2xl font-bold text-white mb-2 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-teal-400 group-hover:to-green-400 group-hover:bg-clip-text transition-all duration-300">
+                      Permintaan Tukar Poin
+                    </h2>
+                    <p className="text-gray-400 group-hover:text-gray-300 transition-colors duration-300">
+                      Proses permintaan penukaran poin dan hadiah
+                    </p>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* Stats Section */}
+          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-gray-900/30 backdrop-blur-xl rounded-xl p-6 border border-gray-800">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-sm">Permintaan Menunggu</p>
+                  <p className="text-2xl font-bold text-white">24</p>
+                </div>
+                <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+              </div>
+            </div>
+            <div className="bg-gray-900/30 backdrop-blur-xl rounded-xl p-6 border border-gray-800">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-sm">Selesai Hari Ini</p>
+                  <p className="text-2xl font-bold text-white">12</p>
+                </div>
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              </div>
+            </div>
+            <div className="bg-gray-900/30 backdrop-blur-xl rounded-xl p-6 border border-gray-800">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-gray-400 text-sm">Poin Ditukar</p>
+                  <p className="text-2xl font-bold text-white">1,248</p>
+                </div>
+                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+              </div>
             </div>
           </div>
         </div>
-      )}
+      </main>
+
+      {/* Footer */}
+      <footer className="relative z-10 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center text-gray-500">
+            <p>&copy; 2025 Panel Admin. Hak cipta dilindungi.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
-};
-
-export default AdminPage;
+}
