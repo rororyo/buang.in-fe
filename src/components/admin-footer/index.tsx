@@ -24,7 +24,7 @@ const AdminFooter = () => {
           }`}
         >
           <FaRecycle size={24} />
-          <span className="text-xs">Dashboard</span>
+          <span className="text-xs">Request Sampah</span>
         </button>
 
         {/* Penukaran */}
