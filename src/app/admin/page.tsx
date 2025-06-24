@@ -1,7 +1,6 @@
 'use client';
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { Package, Gift } from 'lucide-react';
 
 export default function AdminLanding() {
   const router = useRouter();
@@ -15,82 +14,76 @@ export default function AdminLanding() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-green-900 to-slate-900">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-10 -left-10 w-72 h-72 bg-green-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-        <div className="absolute top-10 right-10 w-72 h-72 bg-emerald-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse animation-delay-2000"></div>
-        <div className="absolute -bottom-10 left-20 w-72 h-72 bg-teal-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse animation-delay-4000"></div>
+    <>
+      {/* Header */}
+      <div className="fixed w-full top-0 z-50 bg-white shadow-lg border-b border-gray-100">
+        <div className="flex items-center justify-between p-4">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+            </div>
+            <h1 className="text-xl font-bold text-gray-900">Admin Dashboard</h1>
+          </div>
+        </div>
       </div>
 
-      {/* Header */}
-      <header className="relative z-10 pt-8 pb-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
-              Panel
-              <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent ml-4">
-                Admin
-              </span>
-            </h1>
-            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-              Kelola permintaan pickup dan penukaran poin
-            </p>
-          </div>
-        </div>
-      </header>
-
       {/* Main Content */}
-      <main className="relative z-10 flex-1 py-12">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            
-            {/* Pickup Requests Button */}
-            <div className="group relative">
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
-              <button
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-emerald-100 pt-20">
+        <div className="flex flex-col items-center p-4 pb-20">
+          
+          {/* Welcome Section */}
+          <div className="w-full max-w-4xl bg-white rounded-2xl shadow-lg p-6 mb-6 border border-gray-100">
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Selamat Datang, Admin! 👋
+              </h2>
+              <p className="text-gray-600">
+                Kelola permintaan pickup sampah dan penukaran poin dengan mudah
+              </p>
+            </div>
+          </div>
+
+          {/* Main Action Buttons */}
+          <div className="w-full max-w-4xl mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              {/* Pickup Requests Button */}
+              <button 
                 onClick={handlePickupRequests}
-                className="relative w-full h-64 bg-gray-900/50 backdrop-blur-xl rounded-2xl p-8 border border-gray-800 hover:border-green-500/50 transition-all duration-300 group-hover:scale-105 group-hover:shadow-2xl group-hover:shadow-green-500/25"
+                className="bg-white rounded-xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1"
               >
-                <div className="flex flex-col items-center justify-center h-full space-y-6">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-green-500 rounded-full blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
-                    <div className="relative bg-gradient-to-br from-green-500 to-emerald-500 p-4 rounded-full">
-                      <Package className="w-12 h-12 text-white" />
-                    </div>
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="w-16 h-16 bg-emerald-100 rounded-xl flex items-center justify-center">
+                    <svg className="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
                   </div>
-                  <div className="text-center">
-                    <h2 className="text-2xl font-bold text-white mb-2 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-green-400 group-hover:to-emerald-400 group-hover:bg-clip-text transition-all duration-300">
-                      Permintaan Pickup
-                    </h2>
-                    <p className="text-gray-400 group-hover:text-gray-300 transition-colors duration-300">
-                      Kelola dan proses permintaan pickup sampah dari pengguna
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Penjemputan Sampah</h3>
+                    <p className="text-gray-600">
+                      Kelola dan proses permintaan penjemputan sampah dari pelanggan
                     </p>
                   </div>
                 </div>
               </button>
-            </div>
 
-            {/* Redeem Points Request Button */}
-            <div className="group relative">
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-teal-600 to-green-600 rounded-2xl blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
-              <button
+              {/* Redeem Points Request Button */}
+              <button 
                 onClick={handleRedeemPointsRequest}
-                className="relative w-full h-64 bg-gray-900/50 backdrop-blur-xl rounded-2xl p-8 border border-gray-800 hover:border-teal-500/50 transition-all duration-300 group-hover:scale-105 group-hover:shadow-2xl group-hover:shadow-teal-500/25"
+                className="bg-white rounded-xl p-8 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1"
               >
-                <div className="flex flex-col items-center justify-center h-full space-y-6">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-teal-500 rounded-full blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
-                    <div className="relative bg-gradient-to-br from-teal-500 to-green-500 p-4 rounded-full">
-                      <Gift className="w-12 h-12 text-white" />
-                    </div>
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="w-16 h-16 bg-yellow-100 rounded-xl flex items-center justify-center">
+                    <svg className="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                    </svg>
                   </div>
-                  <div className="text-center">
-                    <h2 className="text-2xl font-bold text-white mb-2 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-teal-400 group-hover:to-green-400 group-hover:bg-clip-text transition-all duration-300">
-                      Permintaan Tukar Poin
-                    </h2>
-                    <p className="text-gray-400 group-hover:text-gray-300 transition-colors duration-300">
-                      Proses permintaan penukaran poin dan hadiah
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Penukaran Poin</h3>
+                    <p className="text-gray-600">
+                      Proses permintaan penukaran poin menjadi uang tunai dari pelanggan
                     </p>
                   </div>
                 </div>
@@ -98,47 +91,29 @@ export default function AdminLanding() {
             </div>
           </div>
 
-          {/* Stats Section */}
-          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-gray-900/30 backdrop-blur-xl rounded-xl p-6 border border-gray-800">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-400 text-sm">Permintaan Menunggu</p>
-                  <p className="text-2xl font-bold text-white">24</p>
-                </div>
-                <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+          {/* Tips Section */}
+          <div className="w-full max-w-4xl bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">Tips Admin</h3>
+                <p className="text-gray-600 text-sm">Panduan untuk mengelola sistem dengan efisien</p>
               </div>
             </div>
-            <div className="bg-gray-900/30 backdrop-blur-xl rounded-xl p-6 border border-gray-800">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-400 text-sm">Selesai Hari Ini</p>
-                  <p className="text-2xl font-bold text-white">12</p>
-                </div>
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              </div>
-            </div>
-            <div className="bg-gray-900/30 backdrop-blur-xl rounded-xl p-6 border border-gray-800">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-gray-400 text-sm">Poin Ditukar</p>
-                  <p className="text-2xl font-bold text-white">1,248</p>
-                </div>
-                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
 
-      {/* Footer */}
-      <footer className="relative z-10 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center text-gray-500">
-            <p>&copy; 2025 Panel Admin. Hak cipta dilindungi.</p>
+            <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-200">
+              <p className="text-sm text-emerald-800">
+                💡 <strong>Tip:</strong> Prioritaskan permintaan pickup yang sudah menunggu lebih dari 24 jam. 
+                Untuk penukaran poin, pastikan validasi data akun pelanggan sebelum melakukan transfer.
+              </p>
+            </div>
           </div>
         </div>
-      </footer>
-    </div>
+      </div>
+    </>
   );
 }

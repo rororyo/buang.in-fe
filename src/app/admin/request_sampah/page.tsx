@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { FilterIcon, CheckIcon, XIcon, SearchIcon, EyeIcon, XCircleIcon, RefreshCw } from "lucide-react";
+import { FilterIcon, CheckIcon, XIcon, SearchIcon, EyeIcon, XCircleIcon, RefreshCw, ChevronLeftIcon } from "lucide-react";
 import api from "@/lib/api";
 import { toast } from "react-toastify";
 
@@ -168,6 +168,12 @@ const AdminPage = () => {
     <div className="flex flex-col items-center min-h-screen" style={{ backgroundColor: "#569490" }}>
       {/* Header Admin */}
       <div className="fixed w-full items-center justify-between p-4 bg-white shadow-md z-50" style={{ backgroundColor: "#235C58" }}>
+        <button
+          onClick={() => (window.location.href = "/admin")}
+          className="absolute top-3 left-4 flex items-center justify-center w-10 h-10 text-white rounded-full hover:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <ChevronLeftIcon size={20} stroke="white"/>
+        </button>
         <h1 className="text-2xl font-bold text-white text-center w-full">Bank Sampah - Verifikasi Sampah</h1>
       </div>
       
