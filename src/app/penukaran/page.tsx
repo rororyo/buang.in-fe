@@ -82,7 +82,7 @@ const PenukaranPage = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen" style={{ backgroundColor: "#569490" }}>
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-emerald-50 to-emerald-100">
       {error && (
         <div className="mt-24 px-6">
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
@@ -106,15 +106,18 @@ const PenukaranPage = () => {
         </button>
         <h1 className="text-2xl font-bold text-black-500 text-center w-full">Penukaran</h1>
       </div>
-      <div className="flex flex-col px-10">
-        <FormInput
-          lat={lat}
-          lon={lon}
-          formData={formData}
-          setFormData={setFormData}
-        />
-        <LokasiSetorSampah lat={lat} lon={lon} />
-        <TombolSetor onClick={handleSubmit} />
+      <div className="flex flex-col px-6 mt-20 space-y-6">
+        {/* FormInput Card */}
+        <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl mx-auto">
+          <FormInput
+            lat={lat}
+            lon={lon}
+            formData={formData}
+            setFormData={setFormData}
+          />
+          <LokasiSetorSampah lat={lat} lon={lon} />
+          <TombolSetor onClick={handleSubmit} />
+        </div>
       </div>
       <Footer />
     </div>
