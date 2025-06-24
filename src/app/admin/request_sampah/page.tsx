@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { FilterIcon, CheckIcon, XIcon, SearchIcon, EyeIcon, XCircleIcon, RefreshCw, ChevronLeftIcon, ChevronLeft, X, Search, Filter, Eye, Check, XCircle } from "lucide-react";
+import { FilterIcon, CheckIcon, XIcon, SearchIcon, EyeIcon, XCircleIcon, RefreshCw, ChevronLeftIcon, ChevronLeft, X, Search, Filter, Eye, Check, XCircle, Upload, Plus, Minus } from "lucide-react";
 import api from "@/lib/api";
 import { toast } from "react-toastify";
 import AdminFooter from "@/components/admin-footer";
@@ -56,6 +56,18 @@ interface SubDistrict {
   name: string;
 }
 
+interface TrashType {
+  id: string;
+  name: string;
+  price_per_kg: number;
+}
+
+interface SelectedTrashType {
+  trash_type_id: string;
+  weight: number;
+  name: string;
+}
+
 interface ApiResponse {
   status: string;
   message: string;
@@ -75,13 +87,37 @@ const AdminPage = () => {
   const [subDistrictFilter, setSubDistrictFilter] = useState("");
   const [data, setData] = useState<PickupRequest[]>([]);
   const [subDistricts, setSubDistricts] = useState<SubDistrict[]>([]);
+  const [trashTypes, setTrashTypes] = useState<TrashType[]>([]);
   const [selected, setSelected] = useState<PickupRequest | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadingSubDistricts, setLoadingSubDistricts] = useState(false);
+  const [loadingTrashTypes, setLoadingTrashTypes] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [processingId, setProcessingId] = useState<string | null>(null);
+  
+  // Confirmation form states
+  const [showConfirmForm, setShowConfirmForm] = useState(false);
+  const [confirmingRequest, setConfirmingRequest] = useState<PickupRequest | null>(null);
+  const [confirmImage, setConfirmImage] = useState<File | null>(null);
+  const [selectedTrashTypes, setSelectedTrashTypes] = useState<SelectedTrashType[]>([]);
+  const [submittingConfirm, setSubmittingConfirm] = useState(false);
+
+  // Fetch trash types
+  const fetchTrashTypes = async () => {
+    setLoadingTrashTypes(true);
+    try {
+      const response = await api.get('/api/setor/trash-types');
+      if (response.status === 200) {
+        setTrashTypes(response.data);
+      }
+    } catch (err: any) {
+      console.error('Error fetching trash types:', err);
+    } finally {
+      setLoadingTrashTypes(false);
+    }
+  };
 
   // Fetch sub-districts
   const fetchSubDistricts = async () => {
@@ -135,39 +171,135 @@ const AdminPage = () => {
     }
   };
 
-  // Handle accept/reject request
-  const handleRequestAction = async (id: string, status: 'accepted' | 'rejected') => {
+  // Handle reject request
+  const handleTolak = async (id: string) => {
     setProcessingId(id);
     
     try {
-      const response = await api.post(`/api/bank-sampah/setor-request/${id}?status=${status}`);
+      const response = await api.post(`/api/bank-sampah/setor-request/${id}?status=rejected`);
       
       if (response.data.status === 'success') {
-        // Update local state
         setData(prev => 
           prev.map(item => 
-            item.id === id ? { ...item, status } : item
+            item.id === id ? { ...item, status: 'rejected' } : item
           )
         );
         
-        // Show success message (you can implement toast notifications)
-        toast.success(`Request ${status === 'accepted' ? 'accepted' : 'rejected'} successfully`);
+        toast.success('Request rejected successfully');
         
-        // Close modal if currently viewing this request
         if (selected?.id === id) {
-          setSelected({ ...selected, status });
+          setSelected({ ...selected, status: 'rejected' });
         }
       }
     } catch (err: any) {
-      console.error(`Error ${status} request:`, err);
-      setError(err.response?.data?.message || `Failed to ${status} request`);
+      console.error('Error rejecting request:', err);
+      setError(err.response?.data?.message || 'Failed to reject request');
     } finally {
       setProcessingId(null);
     }
   };
 
-  const handleTerima = (id: string) => handleRequestAction(id, 'accepted');
-  const handleTolak = (id: string) => handleRequestAction(id, 'rejected');
+  // Handle accept (show confirmation form)
+  const handleTerima = (request: PickupRequest) => {
+    setConfirmingRequest(request);
+    setShowConfirmForm(true);
+    setSelectedTrashTypes([]);
+    setConfirmImage(null);
+  };
+
+  // Handle adding trash type to selection
+  const addTrashType = () => {
+    if (trashTypes.length > 0) {
+      const firstType = trashTypes[0];
+      setSelectedTrashTypes(prev => [...prev, {
+        trash_type_id: firstType.id,
+        weight: 0,
+        name: firstType.name
+      }]);
+    }
+  };
+
+  // Handle removing trash type from selection
+  const removeTrashType = (index: number) => {
+    setSelectedTrashTypes(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Handle updating trash type selection
+  const updateTrashType = (index: number, field: 'trash_type_id' | 'weight', value: string | number) => {
+    setSelectedTrashTypes(prev => prev.map((item, i) => {
+      if (i === index) {
+        if (field === 'trash_type_id') {
+          const trashType = trashTypes.find(t => t.id === value);
+          return {
+            ...item,
+            trash_type_id: value as string,
+            name: trashType?.name || ''
+          };
+        } else {
+          return {
+            ...item,
+            [field]: Number(value)
+          };
+        }
+      }
+      return item;
+    }));
+  };
+
+  // Handle form submission
+  const handleConfirmSubmit = async () => {
+    if (!confirmingRequest || !confirmImage || selectedTrashTypes.length === 0) {
+      toast.error('Please fill all required fields');
+      return;
+    }
+
+    // Validate weights
+    const hasInvalidWeight = selectedTrashTypes.some(item => item.weight <= 0);
+    if (hasInvalidWeight) {
+      toast.error('All weights must be greater than 0');
+      return;
+    }
+
+    setSubmittingConfirm(true);
+    
+    try {
+      const formData = new FormData();
+      formData.append('image', confirmImage);
+      formData.append('pickup_request_id', confirmingRequest.id);
+      formData.append('trash_type_ids', JSON.stringify(selectedTrashTypes.map(item => item.trash_type_id)));
+      formData.append('weights', JSON.stringify(selectedTrashTypes.map(item => item.weight)));
+
+      const response = await api.post('/api/bank-sampah/setor-request/complete', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (response.data.status === 'success') {
+        // Update local state
+        setData(prev => 
+          prev.map(item => 
+            item.id === confirmingRequest.id ? { ...item, status: 'accepted' } : item
+          )
+        );
+        
+        toast.success('Pickup request completed successfully');
+        setShowConfirmForm(false);
+        setConfirmingRequest(null);
+        setConfirmImage(null);
+        setSelectedTrashTypes([]);
+        
+        if (selected?.id === confirmingRequest.id) {
+          setSelected({ ...selected, status: 'accepted' });
+        }
+      }
+    } catch (err: any) {
+      console.error('Error completing request:', err);
+      toast.error(err.response?.data?.message || 'Failed to complete request');
+    } finally {
+      setSubmittingConfirm(false);
+    }
+  };
 
   // Filter data based on search criteria
   const filteredData = data.filter(item => {
@@ -197,6 +329,7 @@ const AdminPage = () => {
   // Load data on component mount and when filters change
   useEffect(() => {
     fetchSubDistricts();
+    fetchTrashTypes();
   }, []);
 
   useEffect(() => {
@@ -399,7 +532,7 @@ const AdminPage = () => {
                               {item.status === "pending" ? (
                                 <>
                                   <button
-                                    onClick={() => handleTerima(item.id)}
+                                    onClick={() => handleTerima(item)}
                                     disabled={processingId === item.id}
                                     className="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg flex items-center gap-1 disabled:opacity-50 transition-colors text-xs font-medium"
                                   >
@@ -464,24 +597,273 @@ const AdminPage = () => {
         </div>
       </div>
 
-      {/* Modal Detail */}
+      {/* Confirmation Form Modal */}
+      {showConfirmForm && confirmingRequest && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-gray-900">Konfirmasi Penerimaan Sampah</h3>
+                <button
+                  onClick={() => setShowConfirmForm(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              <div className="mb-6 p-4 bg-gray-50 rounded-xl">
+                <h4 className="font-semibold text-gray-900 mb-2">Detail Permintaan</h4>
+                <p className="text-sm text-gray-600">User: {confirmingRequest.user.username}</p>
+                <p className="text-sm text-gray-600">Alamat: {confirmingRequest.address}</p>
+                <p className="text-sm text-gray-600">Tanggal: {formatDate(confirmingRequest.created_at)}</p>
+              </div>
+
+              <div className="space-y-6">
+                {/* Image Upload */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-900 mb-2">
+                    Foto Bukti Penerimaan Sampah <span className="text-red-500">*</span>
+                  </label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-emerald-500 transition-colors">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setConfirmImage(e.target.files?.[0] || null)}
+                      className="hidden"
+                      id="image-upload"
+                    />
+                    <label htmlFor="image-upload" className="cursor-pointer">
+                      <Upload size={32} className="mx-auto mb-2 text-gray-400" />
+                      <p className="text-sm text-gray-600">
+                        {confirmImage ? confirmImage.name : 'Klik untuk upload foto'}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">PNG, JPG up to 10MB</p>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Trash Types Selection */}
+                <div>
+                  <div className="flex justify-between items-center mb-4">
+                    <label className="block text-sm font-medium text-gray-900">
+                      Jenis Sampah <span className="text-red-500">*</span>
+                    </label>
+                    <button
+                      onClick={addTrashType}
+                      disabled={loadingTrashTypes}
+                      className="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1 rounded-lg flex items-center gap-1 text-sm transition-colors disabled:opacity-50"
+                    >
+                      <Plus size={16} />
+                      Tambah Jenis
+                    </button>
+                  </div>
+
+                  {selectedTrashTypes.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      <p>Belum ada jenis sampah yang dipilih</p>
+                      <p className="text-sm">Klik "Tambah Jenis" untuk menambahkan</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {selectedTrashTypes.map((item, index) => (
+                        <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                          <select
+                            value={item.trash_type_id}
+                            onChange={(e) => updateTrashType(index, 'trash_type_id', e.target.value)}
+                            className="flex-1 border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                          >
+                            {trashTypes.map((type) => (
+                              <option key={type.id} value={type.id}>
+                                {type.name} (Rp {type.price_per_kg}/kg)
+                              </option>
+                            ))}
+                          </select>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="number"
+                              placeholder="Berat (kg)"
+                              value={item.weight || ''}
+                              onChange={(e) => updateTrashType(index, 'weight', parseFloat(e.target.value) || 0)}
+                              className="w-24 border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                              min="0"
+                              step="0.1"
+                            />
+                            <span className="text-sm text-gray-600">kg</span>
+                          </div>
+                          <button
+                            onClick={() => removeTrashType(index)}
+                            className="text-red-500 hover:text-red-700 transition-colors"
+                          >
+                            <Minus size={18} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Summary */}
+                {selectedTrashTypes.length > 0 && (
+                  <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+                    <h5 className="font-semibold text-emerald-900 mb-2">Ringkasan</h5>
+                    <div className="space-y-1 text-sm">
+                      <p className="text-emerald-800">
+                        Total Jenis: {selectedTrashTypes.length}
+                      </p>
+                      <p className="text-emerald-800">
+                        Total Berat: {selectedTrashTypes.reduce((sum, item) => sum + (item.weight || 0), 0).toFixed(1)} kg
+                      </p>
+                      <p className="text-emerald-800">
+                        Estimasi Poin: {selectedTrashTypes.reduce((sum, item) => {
+                          const trashType = trashTypes.find(t => t.id === item.trash_type_id);
+                          return sum + ((item.weight || 0) * (trashType?.price_per_kg || 0));
+                        }, 0).toFixed(0)} poin
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-4">
+                  <button
+                    onClick={() => setShowConfirmForm(false)}
+                    disabled={submittingConfirm}
+                    className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl font-medium transition-colors disabled:opacity-50"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    onClick={handleConfirmSubmit}
+                    disabled={submittingConfirm || !confirmImage || selectedTrashTypes.length === 0}
+                    className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl font-medium transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {submittingConfirm ? (
+                      <>
+                        <RefreshCw size={18} className="animate-spin" />
+                        Memproses...
+                      </>
+                    ) : (
+                      <>
+                        <Check size={18} />
+                        Konfirmasi Penerimaan
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Detail Modal */}
       {selected && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => setSelected(null)}
-          />
-          <div className="relative bg-white rounded-2xl shadow-2xl p-8 w-full max-w-5xl max-h-[90vh] overflow-y-auto z-10 border border-gray-200">
-            <button
-              className="absolute top-6 right-6 text-gray-400 hover:text-red-500 transition-colors z-20"
-              onClick={() => setSelected(null)}
-            >
-              <XCircle size={28} />
-            </button>
-            
-            <div className="grid md:grid-cols-2 gap-8">
-              {/* Image Section */}
-              <div className="flex flex-col items-center">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-gray-900">Detail Permintaan</h3>
+                <button
+                  onClick={() => setSelected(null)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                {/* User Info */}
+                <div className="p-4 bg-gray-50 rounded-xl">
+                  <h4 className="font-semibold text-gray-900 mb-3">Informasi User</h4>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-gray-600">Nama:</span>
+                      <p className="font-medium">{selected.user.username}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Email:</span>
+                      <p className="font-medium">{selected.user.email}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Telepon:</span>
+                      <p className="font-medium">{selected.phone_number}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Poin User:</span>
+                      <p className="font-medium">{selected.user.points}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Pickup Info */}
+                <div className="p-4 bg-blue-50 rounded-xl">
+                  <h4 className="font-semibold text-gray-900 mb-3">Informasi Pickup</h4>
+                  <div className="space-y-2 text-sm">
+                    <div>
+                      <span className="text-gray-600">Alamat:</span>
+                      <p className="font-medium">{selected.address}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Kecamatan:</span>
+                      <p className="font-medium">
+                        {selected.sub_district_id ? getSubDistrictName(selected.sub_district_id) : 'N/A'}
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <span className="text-gray-600">Mulai:</span>
+                        <p className="font-medium">{new Date(selected.pickup_start_time).toLocaleString('id-ID')}</p>
+                      </div>
+                      <div>
+                        <span className="text-gray-600">Selesai:</span>
+                        <p className="font-medium">{new Date(selected.pickup_end_time).toLocaleString('id-ID')}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Trash Info */}
+                <div className="p-4 bg-emerald-50 rounded-xl">
+                  <h4 className="font-semibold text-gray-900 mb-3">Informasi Sampah</h4>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-gray-600">Berat:</span>
+                      <p className="font-medium">{selected.weight} kg</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Poin:</span>
+                      <p className="font-medium">{selected.points}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Panjang:</span>
+                      <p className="font-medium">{selected.length} cm</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Lebar:</span>
+                      <p className="font-medium">{selected.width} cm</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Tinggi:</span>
+                      <p className="font-medium">{selected.height} cm</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Status:</span>
+                      <span className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${
+                        selected.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                        selected.status === 'accepted' ? 'bg-green-100 text-green-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {selected.status === 'pending' ? 'Menunggu' :
+                         selected.status === 'accepted' ? 'Diterima' : 'Ditolak'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Image */}
+                {selected.img_url && (
+                  <div className="flex flex-col items-center">
                 <div className="w-full max-w-sm">
                   <img
                     src={selected.img_url ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${selected.img_url}` : "https://via.placeholder.com/300x300?text=No+Image"}
@@ -492,229 +874,40 @@ const AdminPage = () => {
                     }}
                   />
                 </div>
-                
-                {/* Status Badge */}
-                <div className="mt-4 w-full">
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <label className="text-sm font-medium text-gray-500">Status</label>
-                    <div className="mt-1">
-                      <span className={`inline-flex px-3 py-1 rounded-full text-sm font-semibold ${
-                        selected.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                        selected.status === 'accepted' ? 'bg-green-100 text-green-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
-                        {selected.status === 'pending' ? 'Menunggu' :
-                        selected.status === 'accepted' ? 'Diterima' : 'Ditolak'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
               </div>
-              
-              {/* Details Section */}
-              <div className="flex flex-col">
-                <div className="flex items-center space-x-3 mb-6">
-                  <div className="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
-                    <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900">Detail Pickup Sampah</h2>
-                    <p className="text-gray-600">Informasi lengkap permintaan</p>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  {/* Transaction Info */}
-                  <div className="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-400">
-                    <h3 className="text-sm font-semibold text-blue-800 mb-2">Informasi Transaksi</h3>
-                    <div className="grid grid-cols-1 gap-2">
-                      <div>
-                        <label className="text-xs font-medium text-blue-600">ID Transaksi</label>
-                        <p className="text-sm font-mono text-blue-900">#{selected.id.slice(-8).toUpperCase()}</p>
-                      </div>
-                      <div>
-                        <label className="text-xs font-medium text-blue-600">Tanggal Pengajuan</label>
-                        <p className="text-sm text-blue-900">{formatDate(selected.created_at)}</p>
-                      </div>
-                    </div>
-                  </div>
+                )}
 
-                  {/* Waste Details */}
-                  <div className="bg-emerald-50 rounded-lg p-4 border-l-4 border-emerald-400">
-                    <h3 className="text-sm font-semibold text-emerald-800 mb-3">Detail Sampah</h3>
-                    <div className="space-y-3">
-                      <div className="bg-white rounded-lg p-3">
-                        <label className="text-xs font-medium text-emerald-600">Nama Sampah</label>
-                        <p className="text-sm font-semibold text-emerald-900">{selected.name || 'Tidak tersedia'}</p>
-                      </div>
-                      
-                      <div className="bg-white rounded-lg p-3">
-                        <label className="text-xs font-medium text-emerald-600">Total Berat</label>
-                        <p className="text-sm font-semibold text-emerald-900">{selected.weight}g</p>
-                      </div>
-
-                      {/* Dimensions */}
-                      <div className="bg-white rounded-lg p-3">
-                        <label className="text-xs font-medium text-emerald-600 mb-2 block">Dimensi</label>
-                        <div className="grid grid-cols-3 gap-2">
-                          <div className="text-center">
-                            <p className="text-xs text-gray-500">Panjang</p>
-                            <p className="text-sm font-medium text-gray-900">{selected.length || 'N/A'} cm</p>
-                          </div>
-                          <div className="text-center">
-                            <p className="text-xs text-gray-500">Lebar</p>
-                            <p className="text-sm font-medium text-gray-900">{selected.width || 'N/A'} cm</p>
-                          </div>
-                          <div className="text-center">
-                            <p className="text-xs text-gray-500">Tinggi</p>
-                            <p className="text-sm font-medium text-gray-900">{selected.height || 'N/A'} cm</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* User Information */}
-                  <div className="bg-purple-50 rounded-lg p-4 border-l-4 border-purple-400">
-                    <h3 className="text-sm font-semibold text-purple-800 mb-3">Informasi Penyetor</h3>
-                    <div className="grid grid-cols-1 gap-3">
-                      <div className="bg-white rounded-lg p-3">
-                        <label className="text-xs font-medium text-purple-600">Nama Pengguna</label>
-                        <p className="text-sm font-semibold text-purple-900">{selected.user.username}</p>
-                      </div>
-                      
-                      <div className="bg-white rounded-lg p-3">
-                        <label className="text-xs font-medium text-purple-600">Email</label>
-                        <p className="text-sm text-purple-900">{selected.user.email}</p>
-                      </div>
-                      
-                      <div className="bg-white rounded-lg p-3">
-                        <label className="text-xs font-medium text-purple-600">Alamat User</label>
-                        <p className="text-sm text-purple-900">{selected.user.address || 'Tidak tersedia'}</p>
-                      </div>
-                      
-                      <div className="bg-white rounded-lg p-3">
-                        <label className="text-xs font-medium text-purple-600">No. Telepon</label>
-                        <p className="text-sm text-purple-900">{selected.phone_number}</p>
-                      </div>
-                      
-                      <div className="bg-white rounded-lg p-3">
-                        <label className="text-xs font-medium text-purple-600">Total Poin User</label>
-                        <p className="text-sm font-semibold text-purple-900">{selected.user.points}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Pickup Information */}
-                  <div className="bg-orange-50 rounded-lg p-4 border-l-4 border-orange-400">
-                    <h3 className="text-sm font-semibold text-orange-800 mb-3">Informasi Penjemputan</h3>
-                    <div className="space-y-3">
-                      <div className="bg-white rounded-lg p-3">
-                        <label className="text-xs font-medium text-orange-600">Kecamatan</label>
-                        <p className="text-sm text-orange-900">
-                          {selected.sub_district_id ? getSubDistrictName(selected.sub_district_id) : 'N/A'}
-                        </p>
-                      </div>
-                      
-                      <div className="bg-white rounded-lg p-3">
-                        <label className="text-xs font-medium text-orange-600">Alamat Pickup</label>
-                        <p className="text-sm text-orange-900">{selected.address}</p>
-                      </div>
-                      
-                      <div className="bg-white rounded-lg p-3">
-                        <label className="text-xs font-medium text-orange-600">Waktu Mulai Pickup</label>
-                        <p className="text-sm text-orange-900">{formatDate(selected.pickup_start_time)}</p>
-                      </div>
-
-                      {selected.pickup_end_time && (
-                        <div className="bg-white rounded-lg p-3">
-                          <label className="text-xs font-medium text-orange-600">Waktu Selesai Pickup</label>
-                          <p className="text-sm text-orange-900">{formatDate(selected.pickup_end_time)}</p>
-                        </div>
-                      )}
-                      
-                      <div className="bg-white rounded-lg p-3">
-                        <label className="text-xs font-medium text-orange-600">Koordinat Lokasi</label>
-                        <p className="text-sm text-orange-900 font-mono">
-                          {selected.pickup_location.coordinates[1]}, {selected.pickup_location.coordinates[0]}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Trash Bank Information */}
-                  {selected.trashBank && (
-                    <div className="bg-indigo-50 rounded-lg p-4 border-l-4 border-indigo-400">
-                      <h3 className="text-sm font-semibold text-indigo-800 mb-3">Informasi Bank Sampah</h3>
-                      <div className="space-y-3">
-                        <div className="bg-white rounded-lg p-3">
-                          <label className="text-xs font-medium text-indigo-600">Nama Bank Sampah</label>
-                          <p className="text-sm font-semibold text-indigo-900">{selected.trashBank.username}</p>
-                        </div>
-                        
-                        <div className="bg-white rounded-lg p-3">
-                          <label className="text-xs font-medium text-indigo-600">Email Bank Sampah</label>
-                          <p className="text-sm text-indigo-900">{selected.trashBank.email}</p>
-                        </div>
-                        
-                        <div className="bg-white rounded-lg p-3">
-                          <label className="text-xs font-medium text-indigo-600">Alamat Bank Sampah</label>
-                          <p className="text-sm text-indigo-900">{selected.trashBank.address || 'Tidak tersedia'}</p>
-                        </div>
-
-                        {selected.trashBank.location && (
-                          <div className="bg-white rounded-lg p-3">
-                            <label className="text-xs font-medium text-indigo-600">Koordinat Bank Sampah</label>
-                            <p className="text-sm text-indigo-900 font-mono">
-                              {selected.trashBank.location.coordinates[1].toFixed(6)}, {selected.trashBank.location.coordinates[0].toFixed(6)}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Points Information */}
-                  {selected.points && (
-                    <div className="bg-green-50 rounded-lg p-4 border-l-4 border-green-400">
-                      <h3 className="text-sm font-semibold text-green-800 mb-2">Informasi Poin</h3>
-                      <div className="bg-white rounded-lg p-3">
-                        <label className="text-xs font-medium text-green-600">Poin Transaksi</label>
-                        <p className="text-lg font-bold text-green-900">{selected.points}</p>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Action buttons in modal */}
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-4">
+                  <button
+                    onClick={() => setSelected(null)}
+                    className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl font-medium transition-colors"
+                  >
+                    Tutup
+                  </button>
                   {selected.status === 'pending' && (
-                    <div className="flex gap-3 pt-6 border-t border-gray-200">
+                    <>
                       <button
-                        onClick={() => handleTerima(selected.id)}
-                        disabled={processingId === selected.id}
-                        className="flex-1 bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 transition-colors font-medium"
+                        onClick={() => {
+                          setSelected(null);
+                          handleTerima(selected);
+                        }}
+                        className="flex-1 bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
                       >
-                        {processingId === selected.id ? (
-                          <RefreshCw size={18} className="animate-spin" />
-                        ) : (
-                          <Check size={18} />
-                        )}
-                        Terima Permintaan
+                        <Check size={18} />
+                        Terima
                       </button>
                       <button
-                        onClick={() => handleTolak(selected.id)}
-                        disabled={processingId === selected.id}
-                        className="flex-1 bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 transition-colors font-medium"
+                        onClick={() => {
+                          setSelected(null);
+                          handleTolak(selected.id);
+                        }}
+                        className="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
                       >
-                        {processingId === selected.id ? (
-                          <RefreshCw size={18} className="animate-spin" />
-                        ) : (
-                          <X size={18} />
-                        )}
-                        Tolak Permintaan
+                        <X size={18} />
+                        Tolak
                       </button>
-                    </div>
+                    </>
                   )}
                 </div>
               </div>
@@ -722,6 +915,8 @@ const AdminPage = () => {
           </div>
         </div>
       )}
+
+      
                 
       <AdminFooter />
     </>
