@@ -7,12 +7,14 @@ import Footer from '@/components/footer';
 import { useUser } from '@/lib/context/UserContext';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
+import api from '@/lib/api'; 
 
 interface UserInformation {
   nama: string;
   alamat: string;
   phone: string;
   saldo: number;
+  img_url: string;
 }
 
 const DashboardPage = () => {
@@ -30,6 +32,7 @@ const DashboardPage = () => {
         alamat: user.address || '',
         phone: user.phone_number || '',
         saldo: user.points ?? 0,
+        img_url: user.avatar_url || '',
       });
     }
   }, [user]);
@@ -73,10 +76,28 @@ const DashboardPage = () => {
     }));
   };
 
-  const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    console.log('Form submitted:', formData);
-    // Proses submit form di sini
+const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  e.preventDefault();
+
+  try {
+    const response = await api.post(
+      '/api/point-exchange',
+      new URLSearchParams({
+        total_points: formData.points,
+        transfer_method: formData.transferMethod,
+        account_number: formData.accountNumber,
+        status: 'pending',
+        ...(formData.transferMethod === 'Bank Transfer' && formData.bankName
+          ? { bank_name: formData.bankName }
+          : {}),
+      }),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      }
+    );
+
     toast.success('Permintaan tukar poin berhasil dikirim!');
     setShowForm(false);
     setFormData({
@@ -85,7 +106,10 @@ const DashboardPage = () => {
       bankName: '',
       accountNumber: ''
     });
-  };
+  } catch (error: any) {
+    toast.error('Gagal menukar poin. Pastikan data yang dimasukkan sudah benar.');
+  }
+};
 
   // Gunakan nilai saldo dari userInformation dengan fallback 0 bila belum ada
   const saldo = userInformation?.saldo ?? 0;
@@ -147,7 +171,7 @@ const DashboardPage = () => {
                 <div className="flex justify-center md:justify-start">
                   <div className="relative">
                     <img
-                      src="https://via.placeholder.com/80"
+                      src={userInformation.img_url || 'https://via.placeholder.com/150'}
                       alt="Profile"
                       className="w-20 h-20 rounded-full border-4 border-emerald-100 shadow-md"
                     />

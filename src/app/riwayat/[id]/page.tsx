@@ -67,7 +67,6 @@ export default function RiwayatDetailPage() {
         setData(res.data.data);
         setError(null);
       } catch (err) {
-        console.error('Error fetching riwayat detail:', err);
         setError('Gagal memuat detail riwayat');
       } finally {
         setLoading(false);

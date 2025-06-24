@@ -36,7 +36,6 @@ export default function TransactionHistory() {
         }));
         setRiwayatList(mapped);
       } catch (error) {
-        console.error("Failed to fetch riwayat:", error);
       } finally {
         setLoading(false);
       }

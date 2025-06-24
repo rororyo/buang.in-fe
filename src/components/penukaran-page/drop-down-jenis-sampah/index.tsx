@@ -29,7 +29,6 @@ const DropdownJenisSampah: React.FC<DropdownJenisSampahProps> = ({
         const response = await api.get("api/setor/trash-types");
         setDropdownOptions(response.data);
       } catch (error) {
-        console.error("Error fetching dropdown options:", error);
       } finally {
         setIsLoading(false);
       }

@@ -89,7 +89,6 @@ const AdminPage = () => {
         setPage(response.data.metadata.page);
       }
     } catch (err: any) {
-      console.error('Error fetching pickup requests:', err);
       setError(err.response?.data?.message || 'Failed to fetch pickup requests');
     } finally {
       setLoading(false);
@@ -120,7 +119,6 @@ const AdminPage = () => {
         }
       }
     } catch (err: any) {
-      console.error(`Error ${status} request:`, err);
       setError(err.response?.data?.message || `Failed to ${status} request`);
     } finally {
       setProcessingId(null);

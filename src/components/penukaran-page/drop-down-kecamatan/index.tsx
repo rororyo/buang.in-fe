@@ -31,7 +31,6 @@ const DropdownKecamatan: React.FC<DropdownKecamatanProps> = ({
         const response = await api.get('/api/setor/sub-districts'); // ganti endpoint ini nanti
         setKecamatanList(response.data);
       } catch (err) {
-        console.error('Gagal memuat kecamatan:', err);
       } finally {
         setIsLoading(false);
       }

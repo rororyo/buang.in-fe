@@ -37,7 +37,7 @@ const ProfilPage = () => {
     birthday: user?.birthday || 'Belum mengisi tanggal lahir',
     phone_Number: user?.phone_number || 'Belum mengisi nomor telepon',
     jumlahPenukaran: 5,
-    photoUrl: "https://via.placeholder.com/150",
+    photoUrl: user?.avatar_url || '',
     role: user?.role || 'user',
     alamat: user?.address || 'Belum ada alamat'
   };
@@ -102,7 +102,6 @@ const ProfilPage = () => {
       toast.success('Profil berhasil diperbarui!');
       setIsEditing(false);
     } catch (error) {
-      console.error(error);
       toast.error('Gagal memperbarui profil.');
     }
   };
@@ -283,7 +282,7 @@ const ProfilPage = () => {
           <div className="relative mb-4">
             <div className="w-24 h-24 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white">
               <img
-                src={photoPreview || profile.photoUrl}
+                src={photoPreview || profile.photoUrl || "https://via.placeholder.com/200x200?text=No+Image"}
                 alt="Profile"
                 className="w-full h-full object-cover"
               />

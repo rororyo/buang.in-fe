@@ -102,7 +102,6 @@ const PenukaranPage = () => {
       toast.success("Data berhasil dikirim!");
       router.push("/dashboard");
     } catch (error: any) {
-      console.error(error.response?.data || error.message);
       toast.error("Gagal mengirim data.");
     }
   };
