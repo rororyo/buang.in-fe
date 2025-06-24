@@ -29,9 +29,9 @@ const PenukaranPage = () => {
     selectedImagePreview: any;
     selectedTrashBank: any;
   }>({
-    nama: "",
-    alamat: "",
-    phone: "",
+    nama: user?.username || "",
+    alamat: user?.address || "",
+    phone: user?.phone_number || "",
     pickupTime: "",
     totalWeight: 0,
     selectedTrashes: [],
