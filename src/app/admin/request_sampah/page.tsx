@@ -104,6 +104,8 @@ const AdminPage = () => {
   const [selectedTrashTypes, setSelectedTrashTypes] = useState<SelectedTrashType[]>([]);
   const [submittingConfirm, setSubmittingConfirm] = useState(false);
 
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
   // Fetch trash types
   const fetchTrashTypes = async () => {
     setLoadingTrashTypes(true);
@@ -629,17 +631,69 @@ const AdminPage = () => {
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={(e) => setConfirmImage(e.target.files?.[0] || null)}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0] || null;
+                        setConfirmImage(file);
+                        
+                        // Create preview URL
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = (e) => {
+                            setImagePreview(e.target?.result as string);
+                          };
+                          reader.readAsDataURL(file);
+                        } else {
+                          setImagePreview(null);
+                        }
+                      }}
                       className="hidden"
                       id="image-upload"
                     />
-                    <label htmlFor="image-upload" className="cursor-pointer">
-                      <Upload size={32} className="mx-auto mb-2 text-gray-400" />
-                      <p className="text-sm text-gray-600">
-                        {confirmImage ? confirmImage.name : 'Klik untuk upload foto'}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">PNG, JPG up to 10MB</p>
-                    </label>
+                    
+                    {!imagePreview ? (
+                      <label htmlFor="image-upload" className="cursor-pointer">
+                        <Upload size={32} className="mx-auto mb-2 text-gray-400" />
+                        <p className="text-sm text-gray-600">
+                          {confirmImage ? confirmImage.name : 'Klik untuk upload foto'}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">PNG, JPG up to 10MB</p>
+                      </label>
+                    ) : (
+                      <div className="space-y-4">
+                        <div className="relative inline-block">
+                          <img
+                            src={imagePreview}
+                            alt="Preview"
+                            className="max-w-full max-h-64 rounded-lg shadow-md"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setConfirmImage(null);
+                              setImagePreview(null);
+                              // Reset the input
+                              const input = document.getElementById('image-upload') as HTMLInputElement;
+                              if (input) input.value = '';
+                            }}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
+                          >
+                            ×
+                          </button>
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          <p className="font-medium">{confirmImage?.name}</p>
+                          <p className="text-xs text-gray-500">
+                            {confirmImage && (confirmImage.size / 1024 / 1024).toFixed(2)} MB
+                          </p>
+                        </div>
+                        <label
+                          htmlFor="image-upload"
+                          className="inline-flex items-center px-4 py-2 bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 transition-colors cursor-pointer text-sm"
+                        >
+                          Ganti Foto
+                        </label>
+                      </div>
+                    )}
                   </div>
                 </div>
 
