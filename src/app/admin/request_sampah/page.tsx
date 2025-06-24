@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { FilterIcon, CheckIcon, XIcon, SearchIcon, EyeIcon, XCircleIcon, RefreshCw, ChevronLeftIcon } from "lucide-react";
 import api from "@/lib/api";
 import { toast } from "react-toastify";
+import AdminFooter from "@/components/admin-footer";
 
 interface PickupRequest {
   id: string;
@@ -437,6 +438,7 @@ const AdminPage = () => {
           </div>
         </div>
       )}
+      <AdminFooter />
     </div>
   );
 };

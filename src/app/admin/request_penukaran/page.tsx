@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Filter, Check, X, Search, Eye, XCircle, RefreshCw, ChevronLeftIcon } from "lucide-react";
+import AdminFooter from "@/components/admin-footer";
 
 interface RedeemRequest {
   id: string;
@@ -512,6 +513,7 @@ const RedeemPointsPage = () => {
           </div>
         </div>
       )}
+      <AdminFooter />
     </div>
   );
 };

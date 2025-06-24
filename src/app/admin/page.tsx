@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import { useRouter } from 'next/navigation';
+import AdminFooter from '@/components/admin-footer';
 
 export default function AdminLanding() {
   const router = useRouter();
@@ -114,6 +115,7 @@ export default function AdminLanding() {
           </div>
         </div>
       </div>
+      <AdminFooter />
     </>
   );
 }
