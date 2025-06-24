@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaFileAlt, FaWineGlassAlt, FaTrashAlt } from 'react-icons/fa';
 import { FaBottleWater } from "react-icons/fa6";
 import Footer from '@/components/footer';
@@ -8,12 +8,31 @@ import { useUser } from '@/lib/context/UserContext';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 
-const DashboardPage = ({}) => {
+interface UserInformation {
+  nama: string;
+  alamat: string;
+  phone: string;
+  saldo: number;
+}
+
+const DashboardPage = () => {
   const router = useRouter();
   const { user, loading } = useUser();
-  const username = user?.username || 'User';
-  const saldo = user?.points || 0;
-  const userPoints = 5000
+
+  // State untuk menyimpan informasi user (dengan fallback default jika belum tersedia)
+  const [userInformation, setUserInformation] = useState<UserInformation | null>(null);
+
+  // Update state userInformation ketika user sudah tersedia
+  useEffect(() => {
+    if (user) {
+      setUserInformation({
+        nama: user.username || '',
+        alamat: user.address || '',
+        phone: user.phone_number || '',
+        saldo: user.points ?? 0,
+      });
+    }
+  }, [user]);
 
   // Loading skeleton component
   const LoadingSkeleton = () => (
@@ -37,7 +56,7 @@ const DashboardPage = ({}) => {
     </div>
   );
 
-  // Form for redeeming points
+  // Form untuk penukaran poin
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     points: '',
@@ -57,7 +76,7 @@ const DashboardPage = ({}) => {
   const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     console.log('Form submitted:', formData);
-    // Handle form submission here
+    // Proses submit form di sini
     toast.success('Permintaan tukar poin berhasil dikirim!');
     setShowForm(false);
     setFormData({
@@ -67,26 +86,27 @@ const DashboardPage = ({}) => {
       accountNumber: ''
     });
   };
-  // Check if form is valid
+
+  // Gunakan nilai saldo dari userInformation dengan fallback 0 bila belum ada
+  const saldo = userInformation?.saldo ?? 0;
+
+  // Validasi form
   const isFormValid = () => {
     const { points, transferMethod, bankName, accountNumber } = formData;
     
-    // Basic validation
-    if (parseInt(points) > userPoints) {
+    if (Number(points) > saldo) {
       return false;
     }
     if (!points || !transferMethod || !accountNumber) {
       return false;
     }
-    
-    // If bank transfer is selected, bank name is also required
     if (transferMethod === 'Bank Transfer' && !bankName) {
       return false;
     }
-    
     return true;
   };
-  // Cancelled redeem points
+
+  // Membatalkan penukaran poin
   const handleCancel = () => {
     setShowForm(false);
     setFormData({
@@ -110,9 +130,7 @@ const DashboardPage = ({}) => {
             </div>
             <h1 className="text-xl font-bold text-gray-900">Dashboard</h1>
           </div>
-          
-          {/* Notification and Menu */}
-
+          {/* Notifikasi & Menu dapat ditambahkan di sini */}
         </div>
       </div>
 
@@ -120,7 +138,7 @@ const DashboardPage = ({}) => {
       <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-emerald-100 pt-20">
         <div className="flex flex-col items-center p-4 pb-20">
           {/* User Profile Section */}
-          {loading ? (
+          {loading || !userInformation ? (
             <LoadingSkeleton />
           ) : (
             <div className="w-full max-w-4xl bg-white rounded-2xl shadow-lg p-6 mb-6 border border-gray-100">
@@ -144,7 +162,7 @@ const DashboardPage = ({}) => {
                 {/* User Info */}
                 <div className="text-center md:text-left">
                   <h2 className="text-2xl font-bold text-gray-900 mb-1">
-                    Halo, {username}! 👋
+                    Halo, {userInformation.nama}! 👋
                   </h2>
                   <p className="text-gray-600 text-sm">
                     Selamat datang di dashboard Buang.in
@@ -174,7 +192,10 @@ const DashboardPage = ({}) => {
           {/* Quick Actions */}
           <div className="w-full max-w-4xl mb-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <button className="bg-white rounded-xl p-4 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1" onClick={() => router.push('/penukaran')}>
+              <button
+                className="bg-white rounded-xl p-4 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1"
+                onClick={() => router.push('/penukaran')}
+              >
                 <div className="flex items-center space-x-3">
                   <div className="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
                     <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -188,7 +209,10 @@ const DashboardPage = ({}) => {
                 </div>
               </button>
 
-              <button className="bg-white rounded-xl p-4 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1" onClick={() => router.push('/riwayat')}>
+              <button
+                className="bg-white rounded-xl p-4 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1"
+                onClick={() => router.push('/riwayat')}
+              >
                 <div className="flex items-center space-x-3">
                   <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                     <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -202,7 +226,10 @@ const DashboardPage = ({}) => {
                 </div>
               </button>
 
-              <button onClick={() => setShowForm(true)} className="bg-white rounded-xl p-4 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1">
+              <button
+                onClick={() => setShowForm(true)}
+                className="bg-white rounded-xl p-4 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1"
+              >
                 <div className="flex items-center space-x-3">
                   <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
                     <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -216,7 +243,7 @@ const DashboardPage = ({}) => {
                 </div>
               </button>
 
-              {/* Modal Overlay */}
+              {/* Modal Overlay untuk Tukar Poin */}
               {showForm && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
                   <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
@@ -224,7 +251,7 @@ const DashboardPage = ({}) => {
                     <div className="flex items-center justify-between mb-6">
                       <div>
                         <h2 className="text-xl font-bold text-gray-900">Tukar Poin</h2>
-                        <p className="text-sm text-gray-500">Poin tersedia: {userPoints.toLocaleString()}</p>
+                        <p className="text-sm text-gray-500">Poin tersedia: {saldo.toLocaleString()}</p>
                       </div>
                       <button 
                         onClick={handleCancel}
@@ -235,14 +262,12 @@ const DashboardPage = ({}) => {
                         </svg>
                       </button>
                     </div>
-
+                    
                     {/* Form */}
                     <div className="space-y-4">
                       {/* Points Input */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Jumlah Poin
-                        </label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Jumlah Poin</label>
                         <input
                           type="number"
                           name="points"
@@ -250,27 +275,25 @@ const DashboardPage = ({}) => {
                           onChange={handleInputChange}
                           placeholder="Masukkan jumlah poin"
                           min="1"
-                          max={userPoints}
+                          max={saldo}
                           className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#00bd7d] focus:border-transparent outline-none transition-colors ${
-                            formData.points && (parseInt(formData.points) > userPoints || parseInt(formData.points) <= 0)
+                            formData.points && (Number(formData.points) > saldo || Number(formData.points) <= 0)
                               ? 'border-red-300 bg-red-50'
                               : 'border-gray-300'
                           }`}
                           required
                         />
-                        {formData.points && parseInt(formData.points) > userPoints && (
+                        {formData.points && Number(formData.points) > saldo && (
                           <p className="text-red-500 text-xs mt-1">Jumlah poin melebihi poin yang tersedia</p>
                         )}
-                        {formData.points && parseInt(formData.points) <= 0 && (
+                        {formData.points && Number(formData.points) <= 0 && (
                           <p className="text-red-500 text-xs mt-1">Jumlah poin harus lebih dari 0</p>
                         )}
                       </div>
-
+                      
                       {/* Transfer Method */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Metode Transfer
-                        </label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Metode Transfer</label>
                         <select
                           name="transferMethod"
                           value={formData.transferMethod}
@@ -285,13 +308,11 @@ const DashboardPage = ({}) => {
                           <option value="Bank Transfer">Bank Transfer</option>
                         </select>
                       </div>
-
-                      {/* Bank Selection (only show if Bank Transfer is selected) */}
+                      
+                      {/* Bank Selection (jika Bank Transfer) */}
                       {formData.transferMethod === 'Bank Transfer' && (
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Pilih Bank
-                          </label>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Pilih Bank</label>
                           <select
                             name="bankName"
                             value={formData.bankName}
@@ -319,8 +340,8 @@ const DashboardPage = ({}) => {
                           value={formData.accountNumber}
                           onChange={handleInputChange}
                           placeholder={
-                            formData.transferMethod === 'Bank Transfer' 
-                              ? "Masukkan nomor rekening" 
+                            formData.transferMethod === 'Bank Transfer'
+                              ? "Masukkan nomor rekening"
                               : `Masukkan nomor ${formData.transferMethod || 'akun'}`
                           }
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00bd7d] focus:border-transparent outline-none transition-colors"
@@ -328,7 +349,7 @@ const DashboardPage = ({}) => {
                         />
                       </div>
 
-                      {/* Action Buttons */}
+                      {/* Tombol Aksi */}
                       <div className="flex space-x-3 pt-4">
                         <button
                           type="button"
@@ -450,8 +471,7 @@ const DashboardPage = ({}) => {
                 <div>
                   <h4 className="font-semibold text-emerald-900 mb-1">Tips Memilah Sampah</h4>
                   <p className="text-sm text-emerald-800">
-                    Pastikan sampah dalam keadaan bersih dan kering sebelum disetor ke bank sampah. 
-                    Pisahkan sampah sesuai jenisnya untuk memudahkan proses daur ulang.
+                    Pastikan sampah dalam keadaan bersih dan kering sebelum disetor ke bank sampah. Pisahkan sampah sesuai jenisnya untuk memudahkan proses daur ulang.
                   </p>
                 </div>
               </div>

@@ -28,7 +28,7 @@ const MapComponent: React.FC<Props> = ({ lat, lon }) => {
   const isReady = lat !== null && lon !== null && isLoaded && mapComponents;
 
   return (
-    <div className="flex flex-col items-center p-6" style={ { backgroundColor: "#569490" }}>
+    <div className="flex flex-col items-center bg-white rounded-xl p-6 shadow-sm border  border-emerald-100" >
       <div className="w-full bg-white p-6 rounded-lg">
         <h2
           className="text-lg font-bold mb-4 text-center"
