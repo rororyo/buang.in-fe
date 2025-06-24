@@ -1,13 +1,14 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import { FaFileAlt, FaWineGlassAlt, FaTrashAlt } from 'react-icons/fa';
 import { FaBottleWater } from "react-icons/fa6";
 import Footer from '@/components/footer';
 import { useUser } from '@/lib/context/UserContext';
 import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
 
-const DashboardPage = () => {
+const DashboardPage = ({userPoints = 5000}) => {
   const router = useRouter();
   const { user, loading } = useUser();
   const username = user?.username || 'User';
@@ -34,6 +35,63 @@ const DashboardPage = () => {
       </div>
     </div>
   );
+
+  // Form for redeeming points
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    points: '',
+    transferMethod: '',
+    bankName: '',
+    accountNumber: ''
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    console.log('Form submitted:', formData);
+    // Handle form submission here
+    toast.success('Permintaan tukar poin berhasil dikirim!');
+    setShowForm(false);
+    setFormData({
+      points: '',
+      transferMethod: '',
+      bankName: '',
+      accountNumber: ''
+    });
+  };
+  // Check if form is valid
+  const isFormValid = () => {
+    const { points, transferMethod, bankName, accountNumber } = formData;
+    
+    // Basic validation
+    if (!points || !transferMethod || !accountNumber) {
+      return false;
+    }
+    
+    // If bank transfer is selected, bank name is also required
+    if (transferMethod === 'Bank Transfer' && !bankName) {
+      return false;
+    }
+    
+    return true;
+  };
+  // Cancelled redeem points
+  const handleCancel = () => {
+    setShowForm(false);
+    setFormData({
+      points: '',
+      transferMethod: '',
+      bankName: '',
+      accountNumber: ''
+    });
+  };
 
   return (
     <>
@@ -140,7 +198,7 @@ const DashboardPage = () => {
                 </div>
               </button>
 
-              <button className="bg-white rounded-xl p-4 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1">
+              <button onClick={() => setShowForm(true)} className="bg-white rounded-xl p-4 shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1">
                 <div className="flex items-center space-x-3">
                   <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
                     <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -153,6 +211,145 @@ const DashboardPage = () => {
                   </div>
                 </div>
               </button>
+
+              {/* Modal Overlay */}
+              {showForm && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+                  <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl">
+                    {/* Header */}
+                    <div className="flex items-center justify-between mb-6">
+                      <div>
+                        <h2 className="text-xl font-bold text-gray-900">Tukar Poin</h2>
+                        <p className="text-sm text-gray-500">Poin tersedia: {userPoints.toLocaleString()}</p>
+                      </div>
+                      <button 
+                        onClick={handleCancel}
+                        className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+                      >
+                        <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    {/* Form */}
+                    <div className="space-y-4">
+                      {/* Points Input */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Jumlah Poin
+                        </label>
+                        <input
+                          type="number"
+                          name="points"
+                          value={formData.points}
+                          onChange={handleInputChange}
+                          placeholder="Masukkan jumlah poin"
+                          min="1"
+                          max={userPoints}
+                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-[#00bd7d] focus:border-transparent outline-none transition-colors ${
+                            formData.points && (parseInt(formData.points) > userPoints || parseInt(formData.points) <= 0)
+                              ? 'border-red-300 bg-red-50'
+                              : 'border-gray-300'
+                          }`}
+                          required
+                        />
+                        {formData.points && parseInt(formData.points) > userPoints && (
+                          <p className="text-red-500 text-xs mt-1">Jumlah poin melebihi poin yang tersedia</p>
+                        )}
+                        {formData.points && parseInt(formData.points) <= 0 && (
+                          <p className="text-red-500 text-xs mt-1">Jumlah poin harus lebih dari 0</p>
+                        )}
+                      </div>
+
+                      {/* Transfer Method */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Metode Transfer
+                        </label>
+                        <select
+                          name="transferMethod"
+                          value={formData.transferMethod}
+                          onChange={handleInputChange}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00bd7d] focus:border-transparent outline-none transition-colors"
+                          required
+                        >
+                          <option value="">Pilih metode transfer</option>
+                          <option value="DANA">DANA</option>
+                          <option value="OVO">OVO</option>
+                          <option value="GoPay">GoPay</option>
+                          <option value="Bank Transfer">Bank Transfer</option>
+                        </select>
+                      </div>
+
+                      {/* Bank Selection (only show if Bank Transfer is selected) */}
+                      {formData.transferMethod === 'Bank Transfer' && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Pilih Bank
+                          </label>
+                          <select
+                            name="bankName"
+                            value={formData.bankName}
+                            onChange={handleInputChange}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00bd7d] focus:border-transparent outline-none transition-colors"
+                            required
+                          >
+                            <option value="">Pilih bank</option>
+                            <option value="BCA">BCA</option>
+                            <option value="BRI">BRI</option>
+                            <option value="Mandiri">Mandiri</option>
+                            <option value="Other">Lainnya</option>
+                          </select>
+                        </div>
+                      )}
+
+                      {/* Account Number */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          {formData.transferMethod === 'Bank Transfer' ? 'Nomor Rekening' : 'Nomor Akun'}
+                        </label>
+                        <input
+                          type="text"
+                          name="accountNumber"
+                          value={formData.accountNumber}
+                          onChange={handleInputChange}
+                          placeholder={
+                            formData.transferMethod === 'Bank Transfer' 
+                              ? "Masukkan nomor rekening" 
+                              : `Masukkan nomor ${formData.transferMethod || 'akun'}`
+                          }
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00bd7d] focus:border-transparent outline-none transition-colors"
+                          required
+                        />
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex space-x-3 pt-4">
+                        <button
+                          type="button"
+                          onClick={handleCancel}
+                          className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                        >
+                          Batal
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSubmit}
+                          disabled={!isFormValid()}
+                          className={`flex-1 px-4 py-3 rounded-lg transition-colors font-medium ${
+                            isFormValid()
+                              ? 'bg-[#00bd7d] text-white hover:bg-[#35dba2] cursor-pointer'
+                              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          }`}
+                        >
+                          Tukar Poin
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
