@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Filter, Check, X, Search, Eye, XCircle, RefreshCw, ChevronLeftIcon } from "lucide-react";
+import { Filter, Check, X, Search, Eye, XCircle, RefreshCw, ChevronLeft } from "lucide-react";
 import AdminFooter from "@/components/admin-footer";
 import { toast } from "react-toastify";
 import api from "@/lib/api";
+
 interface RedeemRequest {
   id: string;
   user_id: string;
@@ -32,14 +33,39 @@ const RedeemPointsPage = () => {
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selected, setSelected] = useState<RedeemRequest | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
-  const fetchRedeemRequests = async () => {
+  const fetchRedeemRequests = async (currentPage: number = 1) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.get("/api/point-exchange");
-      setData(response.data);
-    } catch (err) {
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: "10",
+        ...(statusFilter && { status: statusFilter }),
+        ...(filterNama && { search: filterNama }),
+        ...(filterTanggal && { date: filterTanggal })
+      });
+
+      const response = await api.get(`/api/point-exchange?${params}`);
+      
+      // Handle both paginated and non-paginated responses
+      if (response.data.data) {
+        // Paginated response
+        setData(response.data.data);
+        setTotalPages(response.data.totalPages || 1);
+        setTotalItems(response.data.totalItems || response.data.data.length);
+      } else {
+        // Non-paginated response
+        setData(response.data);
+        setTotalPages(1);
+        setTotalItems(response.data.length);
+      }
+    } catch (err: any) {
+      console.error("Error fetching redeem requests:", err);
       setError("Gagal memuat data penukaran poin.");
     } finally {
       setLoading(false);
@@ -49,10 +75,12 @@ const RedeemPointsPage = () => {
   const handleAction = async (id: string, status: "accepted" | "rejected") => {
     setProcessingId(id);
     try {
-      await api.post(`/api/point-exchange/${id}?status=${status}`);
+      await api.post(`/api/point-exchange/${id}`, { status });
       toast.success(
         `Request berhasil di${status === "accepted" ? "setujui" : "tolak"}.`
       );
+      
+      // Update local state
       setData((prev) =>
         prev.map((item) =>
           item.id === id
@@ -70,19 +98,57 @@ const RedeemPointsPage = () => {
             : item
         )
       );
-    } catch (err) {
-      toast.error("Gagal memproses permintaan. Poin pengguna tidak cukup.");
+
+      // Close modal if open
+      if (selected && selected.id === id) {
+        setSelected({ ...selected, status });
+      }
+    } catch (err: any) {
+      console.error("Error processing request:", err);
+      if (err.response?.status === 400) {
+        toast.error("Gagal memproses permintaan. Poin pengguna tidak cukup.");
+      } else {
+        toast.error("Gagal memproses permintaan. Silakan coba lagi.");
+      }
     } finally {
       setProcessingId(null);
+    }
+  };
+
+  const handleTerima = (id: string) => handleAction(id, "accepted");
+  const handleTolak = (id: string) => handleAction(id, "rejected");
+
+  const handlePrevPage = () => {
+    if (page > 1) {
+      const newPage = page - 1;
+      setPage(newPage);
+      fetchRedeemRequests(newPage);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (page < totalPages) {
+      const newPage = page + 1;
+      setPage(newPage);
+      fetchRedeemRequests(newPage);
     }
   };
 
   const formatDate = (date: string) =>
     new Date(date).toLocaleDateString("id-ID");
 
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0
+    }).format(amount);
+  };
+
   useEffect(() => {
-    fetchRedeemRequests();
-  }, [statusFilter]);
+    setPage(1);
+    fetchRedeemRequests(1);
+  }, [statusFilter, filterNama, filterTanggal]);
 
   const filteredData = data.filter((item) => {
     const matchName =
@@ -128,6 +194,11 @@ const RedeemPointsPage = () => {
               <p className="text-gray-600">
                 Kelola dan verifikasi permintaan penukaran poin dari pengguna
               </p>
+              {totalItems > 0 && (
+                <p className="text-sm text-gray-500 mt-2">
+                  Total: {totalItems} permintaan
+                </p>
+              )}
             </div>
           </div>
 
@@ -210,6 +281,7 @@ const RedeemPointsPage = () => {
                     <tr>
                       <th className="py-4 px-6 text-left font-semibold text-gray-900">Nama User</th>
                       <th className="py-4 px-6 text-left font-semibold text-gray-900">Tanggal</th>
+                      <th className="py-4 px-6 text-left font-semibold text-gray-900">Poin</th>
                       <th className="py-4 px-6 text-left font-semibold text-gray-900">Status</th>
                       <th className="py-4 px-6 text-left font-semibold text-gray-900">Detail</th>
                       <th className="py-4 px-6 text-center font-semibold text-gray-900">Aksi</th>
@@ -218,7 +290,7 @@ const RedeemPointsPage = () => {
                   <tbody className="divide-y divide-gray-200">
                     {filteredData.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="text-center py-12 text-gray-500">
+                        <td colSpan={6} className="text-center py-12 text-gray-500">
                           <div className="flex flex-col items-center">
                             <div className="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center mb-4">
                               <Search size={24} className="text-gray-400" />
@@ -233,8 +305,13 @@ const RedeemPointsPage = () => {
                         <tr key={item.id} className="hover:bg-gray-50">
                           <td className="py-4 px-6">
                             <div className="font-medium text-gray-900">{item.user.username}</div>
+                            <div className="text-xs text-gray-500">{item.user.email}</div>
                           </td>
                           <td className="py-4 px-6 text-gray-600">{formatDate(item.created_at)}</td>
+                          <td className="py-4 px-6">
+                            <div className="font-semibold text-emerald-600">{item.total_points.toLocaleString()}</div>
+                            <div className="text-xs text-gray-500">poin</div>
+                          </td>
                           <td className="py-4 px-6">
                             <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${
                               item.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
@@ -386,17 +463,29 @@ const RedeemPointsPage = () => {
                   
                   <div className="bg-gray-50 rounded-lg p-4">
                     <label className="text-sm font-medium text-gray-500">Poin yang Ditukar</label>
-                    <p className="text-lg font-semibold text-emerald-600">{selected.points_redeemed}</p>
+                    <p className="text-lg font-semibold text-emerald-600">{selected.total_points.toLocaleString()}</p>
                   </div>
                   
                   <div className="bg-gray-50 rounded-lg p-4">
-                    <label className="text-sm font-medium text-gray-500">Metode Pembayaran</label>
-                    <p className="text-lg text-gray-900">{selected.payment_method}</p>
+                    <label className="text-sm font-medium text-gray-500">Metode Transfer</label>
+                    <p className="text-lg text-gray-900">{selected.transfer_method}</p>
                   </div>
                   
-                  <div className="bg-gray-50 rounded-lg p-4 md:col-span-2">
-                    <label className="text-sm font-medium text-gray-500">Nomor Tujuan</label>
-                    <p className="text-lg font-mono text-gray-900">{selected.payment_number}</p>
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <label className="text-sm font-medium text-gray-500">Nomor Rekening</label>
+                    <p className="text-lg font-mono text-gray-900">{selected.account_number}</p>
+                  </div>
+
+                  {selected.bank_name && (
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <label className="text-sm font-medium text-gray-500">Nama Bank</label>
+                      <p className="text-lg text-gray-900">{selected.bank_name}</p>
+                    </div>
+                  )}
+                  
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <label className="text-sm font-medium text-gray-500">Poin Pengguna Saat Ini</label>
+                    <p className="text-lg font-semibold text-blue-600">{selected.user.points.toLocaleString()}</p>
                   </div>
                 </div>
                 
