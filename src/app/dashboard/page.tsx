@@ -8,11 +8,12 @@ import { useUser } from '@/lib/context/UserContext';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 
-const DashboardPage = ({userPoints = 5000}) => {
+const DashboardPage = ({}) => {
   const router = useRouter();
   const { user, loading } = useUser();
   const username = user?.username || 'User';
   const saldo = user?.points || 0;
+  const userPoints = 5000
 
   // Loading skeleton component
   const LoadingSkeleton = () => (
@@ -71,6 +72,9 @@ const DashboardPage = ({userPoints = 5000}) => {
     const { points, transferMethod, bankName, accountNumber } = formData;
     
     // Basic validation
+    if (parseInt(points) > userPoints) {
+      return false;
+    }
     if (!points || !transferMethod || !accountNumber) {
       return false;
     }
