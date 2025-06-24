@@ -10,15 +10,20 @@ interface PickupRequest {
   id: string;
   name: string;
   address: string;
-  total_weight: number;
+  weight: number;
+  length: number;
+  width: number;
+  height: number;
   img_url: string;
+  points: number;
   status: 'pending' | 'accepted' | 'rejected';
   phone_number: string;
   pickup_location: {
     type: string;
     coordinates: [number, number];
   };
-  pickup_time: string;
+  pickup_start_time: string;
+  pickup_end_time: string;
   created_at: string;
   user_id: string;
   trash_bank_id: string;
@@ -26,6 +31,8 @@ interface PickupRequest {
   user: {
     id: string;
     username: string;
+    address: string;
+    phone_number: string;
     email: string;
     role: string;
     points: number;
@@ -35,6 +42,7 @@ interface PickupRequest {
     id: string;
     username: string;
     email: string;
+    address: string;
     role: string;
     location: {
       type: string;
@@ -463,7 +471,7 @@ const AdminPage = () => {
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setSelected(null)}
           />
-          <div className="relative bg-white rounded-2xl shadow-2xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto z-10 border border-gray-200">
+          <div className="relative bg-white rounded-2xl shadow-2xl p-8 w-full max-w-5xl max-h-[90vh] overflow-y-auto z-10 border border-gray-200">
             <button
               className="absolute top-6 right-6 text-gray-400 hover:text-red-500 transition-colors z-20"
               onClick={() => setSelected(null)}
@@ -484,6 +492,23 @@ const AdminPage = () => {
                     }}
                   />
                 </div>
+                
+                {/* Status Badge */}
+                <div className="mt-4 w-full">
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <label className="text-sm font-medium text-gray-500">Status</label>
+                    <div className="mt-1">
+                      <span className={`inline-flex px-3 py-1 rounded-full text-sm font-semibold ${
+                        selected.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                        selected.status === 'accepted' ? 'bg-green-100 text-green-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {selected.status === 'pending' ? 'Menunggu' :
+                        selected.status === 'accepted' ? 'Diterima' : 'Ditolak'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
               
               {/* Details Section */}
@@ -501,77 +526,166 @@ const AdminPage = () => {
                 </div>
                 
                 <div className="space-y-4">
-                  <div className="grid grid-cols-1 gap-4">
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <label className="text-sm font-medium text-gray-500">Nama Pengguna</label>
-                      <p className="text-lg font-semibold text-gray-900">{selected.user.username}</p>
-                    </div>
-                    
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <label className="text-sm font-medium text-gray-500">Email</label>
-                      <p className="text-lg text-gray-900">{selected.user.email}</p>
-                    </div>
-                    
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <label className="text-sm font-medium text-gray-500">Kecamatan</label>
-                      <p className="text-lg text-gray-900">
-                        {selected.sub_district_id ? getSubDistrictName(selected.sub_district_id) : 'N/A'}
-                      </p>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-gray-50 rounded-lg p-4">
-                        <label className="text-sm font-medium text-gray-500">Total Berat</label>
-                        <p className="text-lg font-semibold text-gray-900">{selected.total_weight}g</p>
+                  {/* Transaction Info */}
+                  <div className="bg-blue-50 rounded-lg p-4 border-l-4 border-blue-400">
+                    <h3 className="text-sm font-semibold text-blue-800 mb-2">Informasi Transaksi</h3>
+                    <div className="grid grid-cols-1 gap-2">
+                      <div>
+                        <label className="text-xs font-medium text-blue-600">ID Transaksi</label>
+                        <p className="text-sm font-mono text-blue-900">#{selected.id.slice(-8).toUpperCase()}</p>
                       </div>
-                      
-                      <div className="bg-gray-50 rounded-lg p-4">
-                        <label className="text-sm font-medium text-gray-500">Poin User</label>
-                        <p className="text-lg font-semibold text-emerald-600">{selected.user.points}</p>
+                      <div>
+                        <label className="text-xs font-medium text-blue-600">Tanggal Pengajuan</label>
+                        <p className="text-sm text-blue-900">{formatDate(selected.created_at)}</p>
                       </div>
-                    </div>
-                    
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <label className="text-sm font-medium text-gray-500">Status</label>
-                      <div className="mt-1">
-                        <span className={`inline-flex px-3 py-1 rounded-full text-sm font-semibold ${
-                          selected.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                          selected.status === 'accepted' ? 'bg-green-100 text-green-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
-                          {selected.status === 'pending' ? 'Menunggu' :
-                           selected.status === 'accepted' ? 'Diterima' : 'Ditolak'}
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <label className="text-sm font-medium text-gray-500">Alamat Pickup</label>
-                      <p className="text-lg text-gray-900">{selected.address}</p>
-                    </div>
-                    
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <label className="text-sm font-medium text-gray-500">No. Telepon</label>
-                      <p className="text-lg text-gray-900">{selected.phone_number}</p>
-                    </div>
-                    
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <label className="text-sm font-medium text-gray-500">Tanggal Pengajuan</label>
-                      <p className="text-lg text-gray-900">{formatDate(selected.created_at)}</p>
-                    </div>
-                    
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <label className="text-sm font-medium text-gray-500">Waktu Pickup</label>
-                      <p className="text-lg text-gray-900">{formatDate(selected.pickup_time)}</p>
-                    </div>
-                    
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <label className="text-sm font-medium text-gray-500">Koordinat Lokasi</label>
-                      <p className="text-lg text-gray-900">
-                        {selected.pickup_location.coordinates[1]}, {selected.pickup_location.coordinates[0]}
-                      </p>
                     </div>
                   </div>
+
+                  {/* Waste Details */}
+                  <div className="bg-emerald-50 rounded-lg p-4 border-l-4 border-emerald-400">
+                    <h3 className="text-sm font-semibold text-emerald-800 mb-3">Detail Sampah</h3>
+                    <div className="space-y-3">
+                      <div className="bg-white rounded-lg p-3">
+                        <label className="text-xs font-medium text-emerald-600">Nama Sampah</label>
+                        <p className="text-sm font-semibold text-emerald-900">{selected.name || 'Tidak tersedia'}</p>
+                      </div>
+                      
+                      <div className="bg-white rounded-lg p-3">
+                        <label className="text-xs font-medium text-emerald-600">Total Berat</label>
+                        <p className="text-sm font-semibold text-emerald-900">{selected.weight}g</p>
+                      </div>
+
+                      {/* Dimensions */}
+                      <div className="bg-white rounded-lg p-3">
+                        <label className="text-xs font-medium text-emerald-600 mb-2 block">Dimensi</label>
+                        <div className="grid grid-cols-3 gap-2">
+                          <div className="text-center">
+                            <p className="text-xs text-gray-500">Panjang</p>
+                            <p className="text-sm font-medium text-gray-900">{selected.length || 'N/A'} cm</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-xs text-gray-500">Lebar</p>
+                            <p className="text-sm font-medium text-gray-900">{selected.width || 'N/A'} cm</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-xs text-gray-500">Tinggi</p>
+                            <p className="text-sm font-medium text-gray-900">{selected.height || 'N/A'} cm</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* User Information */}
+                  <div className="bg-purple-50 rounded-lg p-4 border-l-4 border-purple-400">
+                    <h3 className="text-sm font-semibold text-purple-800 mb-3">Informasi Penyetor</h3>
+                    <div className="grid grid-cols-1 gap-3">
+                      <div className="bg-white rounded-lg p-3">
+                        <label className="text-xs font-medium text-purple-600">Nama Pengguna</label>
+                        <p className="text-sm font-semibold text-purple-900">{selected.user.username}</p>
+                      </div>
+                      
+                      <div className="bg-white rounded-lg p-3">
+                        <label className="text-xs font-medium text-purple-600">Email</label>
+                        <p className="text-sm text-purple-900">{selected.user.email}</p>
+                      </div>
+                      
+                      <div className="bg-white rounded-lg p-3">
+                        <label className="text-xs font-medium text-purple-600">Alamat User</label>
+                        <p className="text-sm text-purple-900">{selected.user.address || 'Tidak tersedia'}</p>
+                      </div>
+                      
+                      <div className="bg-white rounded-lg p-3">
+                        <label className="text-xs font-medium text-purple-600">No. Telepon</label>
+                        <p className="text-sm text-purple-900">{selected.phone_number}</p>
+                      </div>
+                      
+                      <div className="bg-white rounded-lg p-3">
+                        <label className="text-xs font-medium text-purple-600">Total Poin User</label>
+                        <p className="text-sm font-semibold text-purple-900">{selected.user.points}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Pickup Information */}
+                  <div className="bg-orange-50 rounded-lg p-4 border-l-4 border-orange-400">
+                    <h3 className="text-sm font-semibold text-orange-800 mb-3">Informasi Penjemputan</h3>
+                    <div className="space-y-3">
+                      <div className="bg-white rounded-lg p-3">
+                        <label className="text-xs font-medium text-orange-600">Kecamatan</label>
+                        <p className="text-sm text-orange-900">
+                          {selected.sub_district_id ? getSubDistrictName(selected.sub_district_id) : 'N/A'}
+                        </p>
+                      </div>
+                      
+                      <div className="bg-white rounded-lg p-3">
+                        <label className="text-xs font-medium text-orange-600">Alamat Pickup</label>
+                        <p className="text-sm text-orange-900">{selected.address}</p>
+                      </div>
+                      
+                      <div className="bg-white rounded-lg p-3">
+                        <label className="text-xs font-medium text-orange-600">Waktu Mulai Pickup</label>
+                        <p className="text-sm text-orange-900">{formatDate(selected.pickup_start_time)}</p>
+                      </div>
+
+                      {selected.pickup_end_time && (
+                        <div className="bg-white rounded-lg p-3">
+                          <label className="text-xs font-medium text-orange-600">Waktu Selesai Pickup</label>
+                          <p className="text-sm text-orange-900">{formatDate(selected.pickup_end_time)}</p>
+                        </div>
+                      )}
+                      
+                      <div className="bg-white rounded-lg p-3">
+                        <label className="text-xs font-medium text-orange-600">Koordinat Lokasi</label>
+                        <p className="text-sm text-orange-900 font-mono">
+                          {selected.pickup_location.coordinates[1]}, {selected.pickup_location.coordinates[0]}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Trash Bank Information */}
+                  {selected.trashBank && (
+                    <div className="bg-indigo-50 rounded-lg p-4 border-l-4 border-indigo-400">
+                      <h3 className="text-sm font-semibold text-indigo-800 mb-3">Informasi Bank Sampah</h3>
+                      <div className="space-y-3">
+                        <div className="bg-white rounded-lg p-3">
+                          <label className="text-xs font-medium text-indigo-600">Nama Bank Sampah</label>
+                          <p className="text-sm font-semibold text-indigo-900">{selected.trashBank.username}</p>
+                        </div>
+                        
+                        <div className="bg-white rounded-lg p-3">
+                          <label className="text-xs font-medium text-indigo-600">Email Bank Sampah</label>
+                          <p className="text-sm text-indigo-900">{selected.trashBank.email}</p>
+                        </div>
+                        
+                        <div className="bg-white rounded-lg p-3">
+                          <label className="text-xs font-medium text-indigo-600">Alamat Bank Sampah</label>
+                          <p className="text-sm text-indigo-900">{selected.trashBank.address || 'Tidak tersedia'}</p>
+                        </div>
+
+                        {selected.trashBank.location && (
+                          <div className="bg-white rounded-lg p-3">
+                            <label className="text-xs font-medium text-indigo-600">Koordinat Bank Sampah</label>
+                            <p className="text-sm text-indigo-900 font-mono">
+                              {selected.trashBank.location.coordinates[1].toFixed(6)}, {selected.trashBank.location.coordinates[0].toFixed(6)}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Points Information */}
+                  {selected.points && (
+                    <div className="bg-green-50 rounded-lg p-4 border-l-4 border-green-400">
+                      <h3 className="text-sm font-semibold text-green-800 mb-2">Informasi Poin</h3>
+                      <div className="bg-white rounded-lg p-3">
+                        <label className="text-xs font-medium text-green-600">Poin Transaksi</label>
+                        <p className="text-lg font-bold text-green-900">{selected.points}</p>
+                      </div>
+                    </div>
+                  )}
                   
                   {/* Action buttons in modal */}
                   {selected.status === 'pending' && (
@@ -608,6 +722,7 @@ const AdminPage = () => {
           </div>
         </div>
       )}
+                
       <AdminFooter />
     </>
   );
