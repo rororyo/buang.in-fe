@@ -74,8 +74,9 @@ const RedeemPointsPage = () => {
 
   const handleAction = async (id: string, status: "accepted" | "rejected") => {
     setProcessingId(id);
+    console.log(id, status);
     try {
-      await api.post(`/api/point-exchange/${id}`, { status });
+      await api.post(`/api/point-exchange/${id}?status=${status}`);
       toast.success(
         `Request berhasil di${status === "accepted" ? "setujui" : "tolak"}.`
       );
