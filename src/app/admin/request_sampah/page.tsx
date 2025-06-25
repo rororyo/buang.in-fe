@@ -771,7 +771,7 @@ const AdminPage = () => {
                       <p className="text-emerald-800">
                         Estimasi Poin: {selectedTrashTypes.reduce((sum, item) => {
                           const trashType = trashTypes.find(t => t.id === item.trash_type_id);
-                          return sum + ((item.weight || 0) * (trashType?.price_per_kg || 0));
+                          return sum + ((item.weight || 0) * 1000);
                         }, 0).toFixed(0)} poin
                       </p>
                     </div>
